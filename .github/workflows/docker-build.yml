@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build Docker Image (Local Test)
 
 on:
   push:
@@ -7,16 +7,12 @@ on:
     branches: [ main, master ]
   workflow_dispatch:  # 允许手动触发
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: read
 
     steps:
       - name: Checkout repository
@@ -31,7 +27,6 @@ jobs:
 
       - name: Configure Maven settings
         env:
-          # 使用Personal Access Token访问Eclipse Sirius包
           PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         run: |
           mkdir -p ~/.m2
@@ -74,25 +69,25 @@ jobs:
             <servers>
               <server>
                 <id>github-sirius-web</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.PACKAGES_TOKEN}</password>
+                <username>USERNAME</username>
+                <password>TOKEN</password>
               </server>
               <server>
                 <id>github-sirius-emfjson</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.PACKAGES_TOKEN}</password>
+                <username>USERNAME</username>
+                <password>TOKEN</password>
               </server>
               <server>
                 <id>github</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.PACKAGES_TOKEN}</password>
+                <username>USERNAME</username>
+                <password>TOKEN</password>
               </server>
             </servers>
           </settings>
           EOF
           # 替换环境变量
-          sed -i "s/\${env.GITHUB_ACTOR}/${{ github.actor }}/g" ~/.m2/settings.xml
-          sed -i "s/\${env.PACKAGES_TOKEN}/$PACKAGES_TOKEN/g" ~/.m2/settings.xml
+          sed -i "s/USERNAME/${{ github.actor }}/g" ~/.m2/settings.xml
+          sed -i "s/TOKEN/$PACKAGES_TOKEN/g" ~/.m2/settings.xml
 
       - name: Build with Maven
         run: mvn clean package -DskipTests -Dcheckstyle.skip -pl backend/application/syson-application -am
@@ -100,32 +95,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=sha
-            type=raw,value=latest
-
-      - name: Build and push Docker image
+      - name: Build Docker image (不推送)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.simple
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          push: false  # 禁用推送
+          tags: syson-ai:latest
+          outputs: type=docker,dest=./syson-ai.tar  # 导出为tar文件
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syson-ai-docker-image
+          path: ./syson-ai.tar
+          retention-days: 7  # 保留7天
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syson-application-jar
+          path: backend/application/syson-application/target/syson-application-*.jar
+          retention-days: 7
