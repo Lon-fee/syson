@@ -40,11 +40,11 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend/syson
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
-      - name: Build frontend
+      - name: Build frontend with Vite
         working-directory: frontend/syson
-        run: npm run build
+        run: npx vite build
 
       - name: Configure Maven settings
         env:
