@@ -30,9 +30,12 @@ jobs:
           cache: maven
 
       - name: Configure Maven settings
+        env:
+          # 使用Personal Access Token访问Eclipse Sirius包
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         run: |
           mkdir -p ~/.m2
-          cat << EOF > ~/.m2/settings.xml
+          cat << 'EOF' > ~/.m2/settings.xml
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -71,22 +74,25 @@ jobs:
             <servers>
               <server>
                 <id>github-sirius-web</id>
-                <username>\${{ github.actor }}</username>
-                <password>\${{ secrets.GITHUB_TOKEN }}</password>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.PACKAGES_TOKEN}</password>
               </server>
               <server>
                 <id>github-sirius-emfjson</id>
-                <username>\${{ github.actor }}</username>
-                <password>\${{ secrets.GITHUB_TOKEN }}</password>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.PACKAGES_TOKEN}</password>
               </server>
               <server>
                 <id>github</id>
-                <username>\${{ github.actor }}</username>
-                <password>\${{ secrets.GITHUB_TOKEN }}</password>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.PACKAGES_TOKEN}</password>
               </server>
             </servers>
           </settings>
           EOF
+          # 替换环境变量
+          sed -i "s/\${env.GITHUB_ACTOR}/${{ github.actor }}/g" ~/.m2/settings.xml
+          sed -i "s/\${env.PACKAGES_TOKEN}/$PACKAGES_TOKEN/g" ~/.m2/settings.xml
 
       - name: Build with Maven
         run: mvn clean package -DskipTests -Dcheckstyle.skip -pl backend/application/syson-application -am
@@ -111,6 +117,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha
+            type=raw,value=latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
