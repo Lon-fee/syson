@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,6 +24,29 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/syson/package-lock.json
+
+      - name: Configure npm for GitHub Packages
+        env:
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=$PACKAGES_TOKEN" >> ~/.npmrc
+          echo "@eclipse-sirius:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+          echo "@eclipse-syson:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+
+      - name: Install frontend dependencies
+        working-directory: frontend/syson
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend/syson
+        run: npm run build
 
       - name: Configure Maven settings
         env:
@@ -85,9 +108,13 @@ jobs:
             </servers>
           </settings>
           EOF
-          # 替换环境变量
           sed -i "s/USERNAME/${{ github.actor }}/g" ~/.m2/settings.xml
           sed -i "s/TOKEN/$PACKAGES_TOKEN/g" ~/.m2/settings.xml
+
+      - name: Copy frontend build to backend resources
+        run: |
+          mkdir -p backend/application/syson-application/src/main/resources/static
+          cp -r frontend/syson/dist/* backend/application/syson-application/src/main/resources/static/
 
       - name: Build with Maven
         run: mvn clean package -DskipTests -Dcheckstyle.skip -pl backend/application/syson-application -am
@@ -95,21 +122,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image (不推送)
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.simple
-          push: false  # 禁用推送
+          push: false
           tags: syson-ai:latest
-          outputs: type=docker,dest=./syson-ai.tar  # 导出为tar文件
+          outputs: type=docker,dest=./syson-ai.tar
 
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
           name: syson-ai-docker-image
           path: ./syson-ai.tar
-          retention-days: 7  # 保留7天
+          retention-days: 7
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
