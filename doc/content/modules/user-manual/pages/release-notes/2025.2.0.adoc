@@ -1,0 +1,112 @@
+= 2025.2.0
+
+== Key highlights
+
+- *Model conformance to {sysmlv2} Beta 2.3 version*: the metamodel has been modified to conform to {sysmlv2} and {kerml} Beta 2.3 specifications released on December 2024 (see https://www.omg.org/spec/SysML/ for more details).
+
+- *Add validation rules*: {product} now implements the constraints (a.k.a. validation rules) from the {sysmlv2} specification.
+The _Validation_ view shows the results of the execution of the constraints on your models.
+
+- *Right-click to display contextual menu (a.k.a. palette)*: In all diagrams, the contextual menu is now available on right-click instead of left-click.
+
+- *Drag and drop in Explorer view* : Users can now move semantic elements using a drag and drop operation in the _Explorer_ view.
+
+- *Undo/redo*: Users can now undo and redo any semantic change (i.e. in _Explorer_ and _Details_ views) with "CTRL + z" and "CTRL + y".
+Undo/redo isn't available yet in diagrams.
+
+== Bug fixes
+
+- Fix an issue where the server could crash when successive REST APIs calls are executed.
+More precisely, the dates fields weren't serialized correctly.
+- Fix an issue where default names of `Elements` were sometimes invalid because corresponding to {sysmlv2} keywords.
+New default names now include a number, this number corresponding to the count of `Elements` of the same kind in the scope.
+For example, if a `PartDefinition` already defines 5 parts, then a new `Part` created under this `PartDefinition` would have _part6_ for name.
+- Fix an issue where downloading of standard libraries pointed at 404 error.
+They are now properly downloaded.
+Export to textual {sysmlv2} isn't fully implemented yet so there are still unhandled cases.
+- Fix `Port Usage` labels in diagrams (feature typing was incorrectly duplicated).
+- In diagrams, labels of `Usages` (e.g.: `Attribute Usages`) with a `Feature Value` relationship having the _initial_ property set to true now use the ":=" symbol instead of "=".
+- In diagrams, labels of `Usages` (e.g.: `Attribute Usages`) with a `Feature Value` relationship having the _default_ property set to true now display the _default_ keyword.
+- In the `General View` diagram, the multiplicity is no longer displayed on graphical edges to conform to the {sysmlv2} specification.
+- In the `General View` diagram, fix an issue where the execution of `New Port In/Inout/Out` tools was failing.
+
+== New features
+
+- A new view named _Query_ is available in {product}, allowing users to query the models.
+
+image::release-notes-query-view.png[Query View, width=85%,height=85%]
+
+This view allows to write AQL queries (see https://eclipse.dev/acceleo/documentation/[AQL documentation] for more details) and get the results of the queries written.
+Please read the xref:user-manual:features/query-view.adoc[Query view section] in this documentation for more details.
+
+- The _Validation_ view now displays the result of the execution of the constraints (a.k.a. validation rules) from the {sysmlv2} specification.
+
+image::release-notes-validation-view.png[Validation View, width=85%,height=85%]
+
+- Users can now move semantic elements using the drag and drop operation in the _Explorer_ view (i.e. move tree items inside the _Explorer_ view).
+
+- Users can now undo and redo any semantic change (i.e. in _Explorer_ and _Details_ views) with "CTRL + z" and "CTRL + y".
+Undo/redo isn't available yet in diagrams.
+
+- A minimap is now available on all diagrams, at the bottom right corner.
+This minimap allows to see the whole diagram in a small square, it highlights the current viewport, and allows to click/drag/scroll the minimap to navigate the diagram.
+
+== Improvements
+
+- The `General View` diagram now supports `Concern Definition` objects.
+The creation tool can be found in the `Requirements` section of the palette.
+`Concern Definition` objects may also be drag-and-dropped from the _Explorer_ onto the diagram background.
+
+image::release-notes-gv-concern-definition.png[Concern Definition node creation tool, width=50%,height=50%]
+
+- The `General View` diagram now supports `Concern Usage` objects.
+The creation tool can be found in the `Requirements` section of the palette.
+`Concern Usage` objects may also be drag-and-dropped from the _Explorer_ onto the diagram background.
+
+image::release-notes-gv-concern-usage.png[Concern Usage node creation tool, width=50%, height=50%]
+
+- The `General View` diagram now displays the _stakeholders_ of `Concern Definition`, `Concern Usage`, `Requirement Definition` and `Requirement Usage` objects.
+
+image::release-notes-gv-stakeholders.png['stakeholders' compartment, width=50%, height=50%]
+
+- In the `General View` diagram, the stakeholder creation tool displays available `Part Usages` in a tree instead of a list.
+
+image::release-notes-gv-stakeholder-creation-selection-dialog-tree.png['stakeholder creation tool selection dialog tree' compartment, width=50%, height=50%]
+
+- In the `General View` diagram, the actor creation tool displays available `Part Usages` in a tree instead of a list.
+
+image::release-notes-gv-actor-creation-selection-dialog-tree.png['actor creation tool selection dialog tree' compartment, width=50%, height=50%]
+
+- Prevent the edition of imported user libraries from the details view.
+- Align metamodel to {sysmlv2} and {kerml} Beta 2.3 specifications.
+The changes are:
+* `TransitionUsage`
+** new operation `sourceFeature() : Feature`
+* New class `TerminateActionUsage`
+** with new derived reference `terminatedOccurrenceArgument : Expression`
+- All standard libraries have been updated to comply with the {sysml} Beta 2.3 specification.
+- In addition to the export as SVG, you can now export diagrams as PNG images.
+
+image::release-notes-diagrams-export-as-png.png[Export diagram as PNG, width=50%,height=50%]
+
+- `Membership#isDistinguishableFrom` derived attribute has been implemented in the metamodel.
+
+- The following concepts are now handled by the export to textual {sysmlv2} module:
+* `Concern Definition`
+* `Concern Usage`
+* `Stakeholder Membership`
+
+- In the `General View` diagram, `Package` and `Namespace Import` graphical nodes can now be resized smaller than their default size.
+- Display in the _Details_ view the properties _isDefault_ and _isInitial_ in Core tab of `Feature Value` concept.
+- Fix an issue where the diagram direct edit on graphical nodes could raise a backend error on unsettable enum attributes.
+
+== Dependency update
+
+- Switch to Sirius Web 2025.2.0
+- Switch to SysIDE 0.8.0
+- Upgrade `turbo` to version 2.3.3
+- Switch to Spring Boot 3.4.1
+
+== Technical details
+
+* For technical details on this {product} release, including breaking changes, see https://github.com/eclipse-syson/syson/blob/main/CHANGELOG.adoc[changelog].

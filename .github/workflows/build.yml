@@ -1,0 +1,203 @@
+name: Continuous integration
+
+on:
+  push:
+    paths-ignore:
+      - "CHANGELOG.adoc"
+      - "docker-compose.yml"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "doc/**"
+    branches:
+      - "**"
+    tags:
+      - "*"
+  pull_request:
+    paths-ignore:
+      - "CHANGELOG.adoc"
+      - "docker-compose.yml"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "doc/**"
+  workflow_dispatch:
+
+env:
+  GITHUB_EVENT_NAME: ${{ github.event_name }}
+  GITHUB_EVENT_PR_HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+  GITHUB_EVENT_PR_BASE_REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
+  GITHUB_EVENT_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  GITHUB_REF: ${{ github.ref }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        if: ${{ env.GITHUB_EVENT_NAME != 'pull_request' }}
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        if: ${{ env.GITHUB_EVENT_NAME == 'pull_request' }}
+        with:
+          ref: ${{ env.GITHUB_EVENT_PR_HEAD_SHA }}
+          persist-credentials: false
+
+      - name: Setup Node SDK
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.16
+          registry-url: https://npm.pkg.github.com/
+
+      - name: Cache Node.js modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - name: Setup Java SDK
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: 17
+          distribution: "temurin"
+
+      - name: Setup some global environment variables
+        run: |
+          echo "git_describe=$(git describe --always)" >> $GITHUB_ENV
+
+      - name: Cache Maven packages
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build the frontend packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ github.token }}" >> .npmrc
+          echo "CI=true" >> $GITHUB_ENV
+          npm ci
+          npm run build
+
+      - name: Check that the frontend dependencies are ok
+        env:
+          GITHUB_EVENT: ${{ toJSON(github.event) }}
+        run: node scripts/check-frontend-dependencies.js
+
+      - name: Copy frontend artifacts
+        run: |
+          mkdir -p backend/application/syson-frontend/src/main/resources/static
+          cp -R frontend/syson/dist/* backend/application/syson-frontend/src/main/resources/static
+
+      - name: Build the backend
+        env:
+          USERNAME: ${{github.actor}}
+          PASSWORD: ${{secrets.GITHUB_TOKEN}}
+        run: mvn -U -B -e clean verify --settings settings.xml
+
+      - name: Archive the code coverage results
+        run: tar -cf coverage.tar backend/releng/syson-test-coverage/target/site/jacoco-aggregate
+
+      - name: Store code coverage results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: jacoco
+          path: coverage.tar
+          retention-days: 5
+
+      - name: Check the global code coverage
+        run: jshell scripts/check-coverage.jsh
+
+      - name: Publish the backend
+        if: startsWith(env.GITHUB_REF, 'refs/tags/v')
+        env:
+          USERNAME: ${{github.actor}}
+          PASSWORD: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: mvn -B deploy -DskipTests --settings settings.xml
+
+      - name: Publish the frontend packages
+        if: startsWith(env.GITHUB_REF, 'refs/tags/v')
+        run: |
+          npm publish --workspaces
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: eclipsesyson/syson
+
+      - name: Set up Docker Buildx to use cache feature
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        id: load
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: backend/application/syson-application
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Check the integration test code
+        run: |
+          npm ci
+          npm run eslint
+        working-directory: integration-tests
+
+      - name: Run end to end tests against the application
+        if: startsWith(env.GITHUB_REF, 'refs/tags/v') == false && env.GITHUB_REF != 'refs/heads/main' && env.GITHUB_REF != 'refs/heads/cooldown'
+        uses: cypress-io/github-action@6c143abc292aa835d827652c2ea025d098311070 # v6.10.1
+        with:
+          build: docker compose -f docker-compose-integration-tests.yml up -d
+          start: docker compose -f docker-compose-integration-tests.yml ps
+          wait-on: "http://localhost:8080"
+          wait-on-timeout: 180
+          working-directory: integration-tests
+          record: false
+        env:
+          IMAGE_TAG: eclipsesyson/syson:${{ steps.meta.outputs.version }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Store Cypress screenshots
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: cypress-screenshots
+          path: integration-tests/target/screenshots/**/*.png
+          retention-days: 5
+
+      - name: Log in to Docker Hub
+        if: env.GITHUB_EVENT_NAME == 'push' && (env.GITHUB_REF == 'refs/heads/main' || startsWith(env.GITHUB_REF, 'refs/tags/v'))
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          username: ${{ env.DOCKER_HUB_USER }}
+          password: ${{ env.DOCKER_HUB_TOKEN }}
+        env:
+          DOCKER_HUB_USER: ${{ secrets.ORG_DOCKER_HUB_USER }}
+          DOCKER_HUB_TOKEN: ${{ secrets.ORG_DOCKER_HUB_TOKEN }}
+
+      - name: Push Docker image
+        if: env.GITHUB_EVENT_NAME == 'push' && (env.GITHUB_REF == 'refs/heads/main' || startsWith(env.GITHUB_REF, 'refs/tags/v'))
+        id: push
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: backend/application/syson-application
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

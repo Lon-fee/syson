@@ -1,0 +1,38 @@
+= APIs
+
+== {sysmlv2} Standard REST APIs
+
+[NOTE]
+====
+The {sysmlv2} API isn't fully available yet, but we're actively developing it.
+In the meantime, you can use the provided file exchange format to ensure interoperability with {product}.
+====
+
+{product} focuses on enabling seamless collaboration within the {mbse} - `MBSE` ecosystem.
+With a strong emphasis on interoperability, {product} aims to support future standard APIs that will connect to a wide range of modeling tools and resources.
+
+Although we've set standard API implementation as a key development goal, {product} already provides a solid foundation for effective collaboration between tools, reinforcing its role as a powerful platform for MBSE practitioners.
+
+
+{product}’s commitment to incorporating standard REST APIs and {sysmlv2} textual specifications highlights its dedication to delivering a flexible and interoperable modeling solution.
+
+Refer to the xref:developer-guide:api/api-details.adoc[API Details Section] for more information about the supported APIs.
+
+== {product} GraphQL APIs
+
+{product} also supports a GraphQL API, which allows for flexible and efficient data retrieval.
+
+GraphQL enables clients to request only the data they need, reducing over-fetching and under-fetching of data.
+
+This is particularly useful in complex modeling scenarios where different clients may require different subsets of data.
+
+For more information about the GraphQL API, refer to the https://github.com/eclipse-sirius/sirius-web[Sirius Web repository] (on which SysON is built upon) which contains all GraphQL API used by SysON.
+
+== APIs Cookbook
+
+For detailed examples, best practices, and guidance on using {product}’s REST APIs, consult the xref:developer-guide:api/api-cookbook.adoc[APIs Cookbook].
+The cookbook includes:
+
+* Step-by-step guides for common tasks.
+* Code snippets for API interactions.
+* Explanations of core API concepts.

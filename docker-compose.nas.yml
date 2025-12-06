@@ -1,0 +1,71 @@
+# SysON AI - 飞牛NAS 部署配置 (使用官方镜像)
+# 使用官方预构建镜像 + 环境变量配置
+
+version: "3.8"
+
+services:
+  # PostgreSQL 数据库
+  syson-database:
+    image: postgres:15
+    container_name: syson-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: syson
+      POSTGRES_USER: syson
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-syson_password}
+      TZ: Asia/Shanghai
+    volumes:
+      - syson-db-data:/var/lib/postgresql/data
+    networks:
+      - syson-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U syson"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SysON 应用 (官方镜像)
+  syson-app:
+    image: eclipsesyson/syson:v2025.12.0
+    container_name: syson-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # 数据库配置
+      SPRING_DATASOURCE_URL: jdbc:postgresql://syson-database:5432/syson
+      SPRING_DATASOURCE_USERNAME: syson
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-syson_password}
+      
+      # 服务器配置
+      SERVER_PORT: 8080
+      SIRIUS_COMPONENTS_CORS_ALLOWEDORIGINPATTERNS: "*"
+      
+      # AI服务配置 (注意：官方镜像暂不包含AI模块)
+      # 以下配置为后续集成预留
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      
+      # 时区设置
+      TZ: Asia/Shanghai
+      
+      # JVM内存配置 (根据NAS内存调整)
+      JAVA_OPTS: "-Xms512m -Xmx2g"
+    depends_on:
+      syson-database:
+        condition: service_healthy
+    networks:
+      - syson-network
+    volumes:
+      - syson-app-data:/app/data
+
+# 持久化存储卷
+volumes:
+  syson-db-data:
+    driver: local
+  syson-app-data:
+    driver: local
+
+# 网络配置
+networks:
+  syson-network:
+    driver: bridge

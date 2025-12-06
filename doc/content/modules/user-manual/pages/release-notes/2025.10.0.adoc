@@ -1,0 +1,144 @@
+= 2025.10.0
+
+== Key highlights
+
+- *Standard diagram switching*: in diagrams, it is now possible to switch from one _ViewDefinition_ to another one without having to re-create the diagram.
+- *Standard libraries update*: Update standard libraries to SysMLv2 and KerML 2025-07 specification released on July 2025 (see https://github.com/Systems-Modeling/SysML-v2-Release for more details).
+- *Requirements table view*: Add a new table view named _Requirements Table_ to display and edit requirements in a tabular way. This table is available on any element.
+xref:user-manual:features/requirement-management.adoc[See the documentation for more details].
+
+== Breaking changes
+
+- In diagrams, (almost) all node descriptions are now synchronized (based on the exposed elements of _ViewUsages_).
+This contribution allows to switch from one _ViewDefinition_ to another one in a _ViewUsage_ without having to re-create the diagram.
+
+The following modules have been deleted:
+
+* `syson-diagram-general-view`
+* `syson-diagram-interconnection-view`
+* `syson-diagram-actionflow-view`
+* `syson-diagram-statetransition-view`
+
+New `syson-standard-diagrams-view` module handles all the graphical nodes and edges of the previous modules.
+
+All existing diagrams of these modules are automatically migrated to the remaining `syson-standard-diagrams-view` module.
+During this migration, you may lost some graphical nodes and edges that were not handled by the synchronization mechanism.
+
+This contribution introduces some breaking changes:
+
+* `AllocationUsageNodeDescriptionProvider` has been deleted. It is now handled as any other `UsageNodeDescriptionProvider`.
+* `UsageNestedActionUsageEdgeDescriptionProvider` has been deleted. It is now handled as any other `UsageNestedUsageEdgeDescriptionProvider`.
+* `SynchronizeExposedElementsInputProcessor`, `SynchronizedExposedElementsEventHandler` and `SynchronizedExposedElementsDiagramInput` have been deleted. With the new synchronization mechanism, it is no longer necessary to manually synchronize the exposed elements of a `ViewUsage` with graphical nodes of its associated diagram.
+* In `ViewCreateService`
+** `getDiagramEmptyCandidate` has been deleted
+* In `ViewEdgeService`
+** `getAllReachableAllocationUsages` has been deleted
+* In `ViewNodeService`
+** `getAllReferencingPerformActionUsages` has been deleted
+** `getAllReachableActors` has been deleted
+* In `ViewToolService`
+** `addExistingElements` has been deleted and replaced by `addToExposedElements`
+** `createTransitionUsage` has been moved to `ViewCreateService`
+** `createViewInFreeFormCompartment` has been deleted
+* In `ToolService`
+** `updateExposedElements` has been deleted and replaced by `ViewToolService#expose`
+* `NodeCreationTester` has been renamed to `ToolTester`
+
+== New features
+
+- In diagrams, it is now possible to switch from one _ViewDefinition_ to another one without having to re-create the diagram.
+- In diagrams, it is now possible to change the appearance (color, font...) of all diagram elements, through the new _Palette_ menu _Appearance_.
+- Add a new table view named _Requirements Table_ to display and edit requirements in a tabular way.
+This table is available on any element.
+xref:user-manual:features/requirement-management.adoc[See the documentation for more details].
+
+== Bug fixes
+
+- Fix textual import issues while importing model with `MetadataAccessExpression`.
+The following model is now properly imported:
+
+```
+private import Metaobjects::SemanticMetadata;
+
+part def Functions {
+    attribute x : ScalarValues::String;
+}
+
+part functions : Functions [*] nonunique;
+
+metadata def Function :> SemanticMetadata {
+    :>> baseType = functions meta SysML::ActionUsage;
+}
+```
+- Fix an issue in the computation of the path of elements in Explorers defined with Sirius Tree APIs instead of Sirius View DSL APIs
+This issue was not visible in SysON but could appear in downstream applications defining explorers with the Sirius Tree APIs.
+- Fix action "New objects from text" being available on all semantic elements in the _Explorer_ view.
+Now it is only available on SysML model elements.
+- Fix library update performance and ensure it does not impact standard libraries.
+- Fix an issue where diagrams' edges were blinking when refreshing a diagram.
+- Fix drag and drop of a graphical node from the diagram background into a _Package_ graphical node.
+- Fix an issue where the _action flow_ compartment was not revealed when the _New Start Action_ was executed.
+- Fix an issue where the _Delete from diagram_ action did nothing on elements inside a _Package_ in diagrams.
+- Fix an issue where a `PartUsage` contained in a `PartUsage` contained in a `Package` was not displayed, even though it was exposed in the `ViewUsage` corresponding to the diagram.
+`PartUsage` is just one example, but the same issue could appear with any other `Element` contained in `Element` contained in a `Package`.
+- Fix an issue where the _action flow_ compartment was not revealed when the _New Decision_/_New Fork_/_New Join_/_New Merge_ tools were executed.
+
+== Improvements
+
+- Update the PostgreSQL version used in the docker image (used for tests purposes) to 15.
+If you are using the docker image and want to upgrade to PostgreSQL 15, please refer to xref:installation-guide:migration-process.adoc[the migration process page of the official documentation].
+Also please remember only YEAR.MONTH.0 versions are stable and suitable for production deployments.
+Other versions, such as intermediate releases, are intended solely for testing purposes.
+- Update standard libraries to SysMLv2 and KerML 2025-07 specification released on July 2025 (see https://github.com/Systems-Modeling/SysML-v2-Release for more details).
+- Improve handling of `SemanticMetadata` by implicitly adding an implicit `Subclassification` or `Subsetting` to the annotated `Type`.
+
+In the following example, _a0_ now automatically subsets _functions_ and _A0_ now automatically subclassifies _Function_:
+
+```
+private import Metaobjects::SemanticMetadata;
+
+part def Functions {
+    attribute x : ScalarValues::String;
+}
+
+part functions : Functions [*] nonunique;
+
+metadata def Function :> SemanticMetadata {
+    :>> baseType = functions meta SysML::ActionUsage;
+}
+
+#Function action a0; // a0 subset functions
+#Function action def A0; // A0 subclassify Functions
+```
+- Move `RequirementUsage`'s _ReqId_ property from the _Advanced_ tab to the _Core_ tab of the _Details View_.
+- Since it is now possible to switch from a _Standard Diagram View_ to another in SysON (for example from _General View_ to _Interconnection View_), the `ViewDefinition` name in displayed in the label of the `ViewUsage` in the _Explorer View_.
+With this enhancement, users can now easily identify which `ViewDefinition` is used by a `ViewUsage`.
+In addition, the `ViewUsages` default name does not contain the name of the `ViewDefinition` anymore.
+With this enhancement, users avoid confusion when switching from one _ViewDefinition_ to another one in a `ViewUsage`.
+
+image::view-usage-label-with-type-explorer-view.png[ViewUsage in Explorer View, width=65%,height=65%]
+
+- Standardize read-only computation.
+We removed the assumptions SysON made on whether a resource is read-only.
+Resources are now considered read-only if:
+* They are Sirius Web libraries imported by reference
+* They are textual SysML files imported as read-only
+* They are standard libraries (SysML and KerML)
+All the other resources are read-write.
+- Update the user documentation with information on library update impact analysis.
+A dialog containing an impact analysis report is now displayed when an user attempts to update a library.
+This dialog lists references that will be removed from the models because their target doesn't exist anymore (e.g. a `PartDefinition` that was typing a `PartUsage` in a model but doesn't exist in the new version of the library).
+
+image::release-notes-library-update-impact-analysis.png[Dialog showing the impact analysis report of the 'Update library' action, width=85%,height=85%]
+
+== Dependency update
+
+- Update to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.10.0]
+- Update to https://github.com/spring-projects/spring-boot/releases/tag/v3.5.5[Spring Boot 3.5.5]
+- Update to vite 7.1.1 and @vitejs/plugin-react 5.0.0
+- Update to vitest 3.2.4 and @vitest/coverage-v8 3.2.4
+- Update to @types/node 22.16.0 to match the version of node that we are using
+
+== Technical details
+
+* For technical details on this {product} release (including breaking changes), please refer to https://github.com/eclipse-syson/syson/blob/main/CHANGELOG.adoc[changelog].

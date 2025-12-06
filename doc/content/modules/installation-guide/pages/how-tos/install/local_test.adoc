@@ -1,0 +1,96 @@
+= Local installation of {product} for single-user testing purposes
+
+Follow these instructions to install a local version of the application, intended for testing purposes.
+This setup is configured for use by the local user only and doesn't include any security configurations.
+
+== Get {product}
+
+[CAUTION]
+.Stable versions
+====
+Only `YEAR.MONTH.0` versions are stable and suitable for production deployments.
+Other versions, such as intermediate releases, are intended solely for testing purposes.
+They're not recommended for production use due to their potential for further changes and instability.
+Always use the stable `.0` releases for any production environments to ensure reliability and support.
+For more details see xref:user-manual:cycle.adoc[].
+====
+
+[#docker-install]
+== Deploy {product} with Docker Compose
+
+The easiest and most straightforward method to deploy {product} using Docker Compose, which automatically deploy prerequisites.
+
+[NOTE]
+====
+Before you proceed with the installation, confirm you have the following xref:requirements.adoc[Hardware prerequisites]:
+
+* https://www.docker.com/[Docker] installed and running.
+====
+
+{product} is distributed as a Docker container.
+To deploy {product}, just download the https://github.com/eclipse-syson/syson/blob/{syson-tag}/docker-compose.yml[docker-compose] file and run the following docker command in the same folder as the one where's the _docker-compose.yml_ file:
+[source, bash]
+----
+docker compose up
+----
+
+[IMPORTANT]
+====
+To run Docker Compose confirm your Docker is running.
+====
+
+This method deploys {product} matching the version tagged in this documentation with a PostgreSQL database, all within a Docker container.
+
+[TIP]
+====
+Docker images are build to run on x86_64 architecture.
+If you need to run {product} Docker image on a Mac Silicon architecture, run the following command in your terminal before executing the Docker image:
+
+[source, bash]
+----
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+----
+====
+
+[NOTE]
+====
+To deploy a specific version `vYYYY.MM.0`, edit the `docker-compose.yml` file and replace the tagged version with your required version.
+For example, update the following line in the `docker-compose.yml`:
+
+[source, docker]
+----
+app:
+  image: "${IMAGE_TAG:-eclipsesyson/syson:*vYYYY.MM.0*}"
+----
+====
+
+[NOTE]
+====
+A container looses all internal data when it is recreated from an image.
+To keep the database when recreating the container, its files must be stored outside the container.
+This is done via mounting a local directory as volume. Add following lines to the database container configuration in the `docker-compose.yml`:
+
+[source, docker]
+----
+    volumes:
+      # Replace YOUR_LOCAL_DATA_FOLDER_PATH with your local data folder path
+      - YOUR_LOCAL_DATA_FOLDER_PATH:/var/lib/postgresql/data
+----
+====
+
+All available versions of {product} as Docker containers are listed in the https://hub.docker.com/r/eclipsesyson/syson/tags[{product} Docker registry].
+
+Once your Docker up, go directly to the <<openwebbrowser>>[Open your web browser] section.
+
+[#openwebbrowser]
+== Open your web browser
+
+Navigate to `http://localhost:8080` to experience {product}.
+
+[CAUTION]
+====
+To end your local testing session, confirm you stop the running PostgreSQL and {product} Docker container and by using the command `docker compose down`.
+Note that this erases all the data you have generated during testing.
+====
+
+If you meet any issues during the installation process, see the xref:troubleshooting.adoc[troubleshooting guide] for detailed solutions.

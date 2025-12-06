@@ -1,0 +1,21 @@
+# Dockerfile.simple - 用于GitHub Actions构建
+# 假设Maven已经在CI中构建完成
+
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+# 安装Node.js (SysON必需)
+RUN apk add --update-cache --no-cache nodejs npm && rm -rf /var/cache/apk/*
+
+# 创建非root用户
+RUN adduser --disabled-password syson
+
+# 复制预构建的JAR (从Maven构建阶段)
+COPY backend/application/syson-application/target/syson-application-*.jar /app/syson-application.jar
+
+EXPOSE 8080
+
+USER syson
+
+ENTRYPOINT ["java", "-jar", "/app/syson-application.jar"]

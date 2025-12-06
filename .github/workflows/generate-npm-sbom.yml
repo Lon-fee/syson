@@ -1,0 +1,104 @@
+name: Generate NPM SBOM
+
+on:
+  workflow_run:
+    workflows: [Continuous integration]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        default: "main"
+        required: true
+
+env:
+  NODE_VERSION: "18.7"
+  REGISTRY_URL: "https://npm.pkg.github.com/"
+  PRODUCT_PATH: "./"
+  WORKFLOW_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+  WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
+  WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+  GITHUB_REF: ${{ github.ref }}
+  INPUTS_VERSION: ${{ github.event.inputs.version }}
+  EVENT_NAME: ${{ github.event_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM for frontend
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request' && (github.event.workflow_run.head_branch == 'main' || startsWith(github.event.workflow_run.head_branch, 'v')) }}
+    outputs:
+      project-version: ${{ steps.version.outputs.PROJECT_VERSION }}
+    permissions:
+      packages: read
+
+    steps:
+      - name: Display metadata of workflow that has been completed before this one
+        run: |
+          echo "Run from workflow_run branch ${WORKFLOW_HEAD_BRANCH}"
+          echo "Run from workflow_run event ${WORKFLOW_EVENT}"
+          echo "Run on github.ref ${GITHUB_REF}"
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          ref: ${{ env.INPUTS_VERSION }}
+          persist-credentials: false
+
+      - name: Setup Node SDK
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.REGISTRY_URL }}
+
+      - name: Install dependencies
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ github.token }}" >> .npmrc
+          echo "CI=true" >> $GITHUB_ENV
+          npm ci
+
+      - name: Install cyclonedx-npm
+        run: |
+          npm install --global @cyclonedx/cyclonedx-npm@2.1.0
+
+      - name: Generate SBOM
+        run: |
+          cyclonedx-npm --output-format json --output-file bom.json
+
+      - name: Extract product version
+        id: version
+        shell: bash
+        run: |
+          event="${EVENT_NAME}"
+          event_workflow_run_head_branch="${WORKFLOW_HEAD_BRANCH}"
+          ref="${GITHUB_REF}"
+          input="${INPUTS_VERSION}"
+
+          VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/bom.json)"
+
+          if [[ "$event" == "workflow_run" ]] && [[ "$ref" == refs/heads/* ]] && [[ ! "$event_workflow_run_head_branch" =~ ^v ]]; then
+            VERSION="${VERSION}@dev"
+          fi
+
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Product version: $VERSION"
+
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: frontend-sbom
+          path: ${{ env.PRODUCT_PATH }}/bom.json
+
+  store-sbom-data: # stores sbom and metadata in a predefined format for otterdog to pick up
+    needs: ["generate-sbom"]
+    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@main
+    with:
+      projectName: "frontend"
+      projectVersion: ${{ needs.generate-sbom.outputs.project-version }}
+      bomArtifact: "frontend-sbom"
+      bomFilename: "bom.json"
+      parentProject: "1b099ee7-62ee-48e1-986b-b7f0309dd344"

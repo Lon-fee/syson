@@ -1,0 +1,31 @@
+{
+  "name": "@eclipse-syson/syson-parent",
+  "version": "2025.12.0",
+  "author": "Eclipse SysON",
+  "license": "EPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-syson/syson"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "engines": {
+    "node": "22.16.0",
+    "npm": "10.9.2"
+  },
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "./frontend/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "format": "turbo run format",
+    "format-lint": "turbo run format-lint"
+  },
+  "devDependencies": {
+    "turbo": "2.4.4"
+  }
+}

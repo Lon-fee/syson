@@ -1,0 +1,32 @@
+site:
+  title: SysON Docs
+  start_page: v2025.12.0@syson::index.adoc
+
+output:
+  clean: true
+
+content:
+  sources:
+    - url: https://github.com/eclipse-syson/syson.git
+      start_paths: doc/content
+      branches: ["main"]
+      tags:
+        ["v*.0", "!v2024.5.{0,1,2}", "!v2024.1.*", "!v2024.3.*", "!v2023.*.*"]
+
+ui:
+  bundle:
+    url: /home/antora/ui-bundle.zip
+
+asciidoc:
+  attributes:
+    icons: font
+    icon-set: fas
+    sectanchors:
+    sectlinks:
+    sectnums: all
+    page-toclevels: 3
+
+antora:
+  extensions:
+    - require: "@antora/lunr-extension"
+      languages: [en, fr]

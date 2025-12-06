@@ -1,0 +1,1440 @@
+= Changelog
+
+== v2026.1.0 (work in progress)
+ 
+=== Shapes
+
+- https://github.com/eclipse-syson/syson/issues/1694[#1694] Customize Elasticsearch index to work with SysML metamodel
+ 
+=== Breaking changes
+
+- [services] move the following methods from `DescriptionNameGenerator` to default methods in `IDescriptionNameGenerator`:
+* `String getName(String prefix, String descType, String suffix)`
+* `String getNodeName(String prefix, String suffix)`
+* `String getBorderNodeName(String prefix, String suffix)`
+* `String getInheritedBorderNodeName(String prefix, String suffix)`
+* `String getCompartmentName(String prefix, String suffix)`
+* `String getCompartmentItemName(String prefix, String suffix)`
+* `String getInheritedCompartmentItemName(String prefix, String suffix)`
+* `String getEdgeName(String prefix, String suffix)`
+
+=== Dependency update
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/1698[#1698] [explorer] Discard non-`Namespace` elements to compute whether a model is a user library.
+This fix ensure that imported models containing, for example, a top-level `LibraryPackage` and a top-level `Comment` is correctly displayed under the _User libraries_ directory.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1666[#1666] [export] Export `SatisfyRequirementUsage` in textual format.
+- https://github.com/eclipse-syson/syson/issues/1653[#1653] [services] Improve service for creating root objects in a document so that it delegates non-SysML scenarios to the default service implementation.
+
+=== New features
+
+== v2025.12.0
+
+=== Shapes
+
+- https://github.com/eclipse-syson/syson/issues/1581[#1581] [diagrams] Display inherited ports as border nodes in diagrams.
+
+=== Architectural decision records
+
+- [ADR-002] Services organization
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/1628[#1628] [services] Introduce new services organization.
+https://doc.mbse-syson.org/syson/main/developer-guide/index.html#services_organization[See the developer guide in the documentation for more details].
+Also introduces new `ServiceMethod` helper class to build AQL service call expressions from type-safe Java method references instead of hardcoded strings.
+- [services] _isActor(Element)_ has been moved from `ViewNodeService` to `MetamodelElementQueryService`.
+- [services] The following services have been moved from `LabelService` and `ViewLabelService` to `DiagramQueryLabelService`:
+* String getBorderNodeUsageLabel(Usage usage)
+* String getCompartmentItemLabel(Documentation documentation)
+* String getCompartmentItemLabel(Usage usage)
+* String getContainerLabel(Element element)
+* String getDefaultInitialDirectEditLabel(Comment comment)
+* String getDefaultInitialDirectEditLabel(Element element)
+* String getDefaultInitialDirectEditLabel(TextualRepresentation textualRepresentation)
+* String getDependencyLabel(Dependency dependency)
+* String getEdgeLabel(Element element)
+* String getInitialDirectEditListItemLabel(Documentation documentation)
+* String getInitialDirectEditListItemLabel(Comment comment)
+* String getInitialDirectEditListItemLabel(Usage usage)
+* String getMultiplicityLabel(Element element)
+* String getTransitionLabel(TransitionUsage transition)
+- https://github.com/eclipse-syson/syson/issues/1638[#1638] [services] The following services have been moved from `LabelService` and `ViewLabelService` to `DiagramMutationLabelService`:
+* Element directEdit(Element element, String newLabel)
+* Element directEdit(Element element, String newLabel, String... options)
+* Element directEdit(Element element, String newLabel, boolean isCompartmentItem, String... options)
+* Element directEditNode(Element element, String newLabel)
+* Element directEditListItem(Element element, String newLabel)
+* Element editMultiplicityRangeCenterLabel(Element element, String newLabel)
+* Element editEdgeCenterLabel(Element element, String newLabel)
+- https://github.com/eclipse-syson/syson/issues/1638[#1638] [services] The following services have been moved from `ToolService` and `ViewToolService` to `DiagramMutationExposeService`:
+* Element addToExposedElements(Element element, boolean recursive, IEditingContext editingContext, DiagramContext diagramContext, Node selectedNode, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element expose(Element element, IEditingContext editingContext, DiagramContext diagramContext, Node selectedNode, Map<NodeDescription, NodeDescription> convertedNodes)
+* boolean removeFromExposedElements(Element element, Node selectedNode, IEditingContext editingContext, DiagramContext diagramContext)
+- https://github.com/eclipse-syson/syson/issues/1638[#1638] [services] The following services have been moved from `ToolService` and `ViewToolService` to `DiagramMutationDndService`:
+* Element dropElementFromExplorer(Element element, IEditingContext editingContext, DiagramContext diagramContext, Node selectedNode, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropElementFromDiagram(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropSubjectFromDiagram(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropObjectiveRequirementFromDiagram(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropElementFromDiagramInRequirementAssumeConstraintCompartment(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropElementFromDiagramInRequirementRequireConstraintCompartment(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+* Element dropElementFromDiagramInConstraintCompartment(Element droppedElement, Node droppedNode, Element targetElement, Node targetNode, IEditingContext editingContext, DiagramContext diagramContext, Map<NodeDescription, NodeDescription> convertedNodes)
+- [services] The following services have been moved from `ToolService` and `ViewToolService` to `DiagramMutationElementService`:
+* StateUsage createChildState(Element parentState, IEditingContext editingContext, DiagramContext diagramContext, Node selectedNode,Map<NodeDescription, NodeDescription> convertedNodes, boolean isParallel, boolean isExhibit)
+- [services] The following services have been moved from `ViewCreateService` to `MetamodelMutationElementService`:
+* Membership createMembership(Element element)
+- [services] The following services have been moved from `ViewNodeService` to `ModelMutationElementService`:
+* Element setAsView(ViewUsage viewUsage, String newViewDefinition)
+- https://github.com/eclipse-syson/syson/issues/1609[#1609] [services] Update the explorer services to match the new infrastructure.
+* `ISysONExplorerService`, `ISysONExplorerServiceDelegate`, `ISysONExplorerFragment`, `ISysONExplorerFilterService`, `ISysONDefaultExplorerService` have been moved to the `org.eclipse.syson.tree.explorer.services.api` package of `syson-tree-services`.
+* `ComposedSysONExplorerService`, `SysONDefaultExplorerServices`, `SysONExplorerFilterService` have been moved to the `org.eclipse.syson.tree.explorer.services` package of `syson-tree-services`.
+* `KerMLStandardLibraryDirectory`, `LibrariesDirectory`, `SysMLStandardLibraryDirectory`, `UserLibrariesDirectory` have been moved to the `org.eclipse.syson.tree.explorer.fragments` package of `syson-tree-services`.
+* `HideExposeElementsTreeItemAlteredContentProvider`, `HideKerMLStandardLibrariesTreeAlteredContentProvider`, `HideMembershipsTreeItemAlteredContentProvider`, `HideRootNamespaceTreeItemAlteredContentProvider`, `HideSysMLStandardLibrariesTreeAlteredContentProvider`, `HideUserLibrariesTreeAlteredContentProvider`, `SysONTreeFilterProvider` have been moved to the `org.eclipse.syson.tree.explorer.filters` package of `syson-tree-services`.
+- https://github.com/eclipse-syson/syson/issues/1166[#1166] [explorer] Fix library workbench to always displays the current library at the root of the explorer.
+* `ISysONService#isImported` and `ISysONService#isFromReferencedLibrary` now require an `IEditingContext` parameter
+* `ISysONExplorerFilterService#isUserLibrary`, `ISysONExplorerFilterService#hideUserLibraries`, and `ISysONExplorerFilterService#applyFilters` now require an `IEditingContext` parameter.
+- [explorer] _NEW_OBJECTS_FROM_TEXT_MENU_ENTRY_CONTRIBUTION_ID_ constant has been moved from `org.eclipse.syson.tree.explorer.view.SysONExplorerTreeDescriptionProvider` to `org.eclipse.syson.tree.explorer.view.menu.context.SysONExplorerTreeItemContextMenuEntryProvider`.
+`SysONDocumentTreeItemContextMenuContribution` and `SysONObjectTreeItemContextMenuContribution` frontend components have been deleted.
+SysON now uses the Sirius-Web implementations of these components.
+
+=== Dependency update
+
+- [releng] Update to ANTLR 4.13.2 to match the version sirius-web is using
+- [releng] Update to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.12.0]
+- [releng] Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.5.7[Spring Boot 3.5.7]
+- [releng] Remove the dependency to xstate
+- [releng] Switch to AQL 8.1.0 from https://download.eclipse.org/acceleo/updates/releases/4.2/R202510230846/[Acceleo 4.2.0]
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/1604[#1604] [export] Fix an issue where the `Imports` located in the root `Namespace` were not exported in the textual format.
+- https://github.com/eclipse-syson/syson/issues/1602[#1602] [diagrams] Fix an issue where the drag and drop of a `RequirementUsage` (or any other `Element`) with a declared short name but no declared name from the _Explorer_ view to a diagram was not possible.
+- https://github.com/eclipse-syson/syson/issues/1581[#1581] [diagrams] Remove rename and delete tools from inherited port palette.
+- https://github.com/eclipse-syson/syson/issues/1611[#1611] [services] Fix an issue where the undo of the deletion of a graphical node in a diagram was not restoring the graphical node correctly.
+- https://github.com/eclipse-syson/syson/issues/1618[#1618] [rest-apis] Fix an issue where the _eAnnotations_ reference coming from the Ecore metamodel was taking into account by REST APIs serialization.
+- https://github.com/eclipse-syson/syson/issues/1621[#1621] [diagrams] Fix an issue where the creation of a _Package_ inside another _Package_ created the _Package_ at the root of the diagram in addition to the inside of the target _Package_.
+- https://github.com/eclipse-syson/syson/issues/1617[#1617] [import] Fix incorrect resolution of _redefined feature_ on `Redefinitions` during textual import.
+- https://github.com/eclipse-syson/syson/issues/1627[#1627] [import] [export] Fix invalid textual import/export of `LiteralRational`.
+- https://github.com/eclipse-syson/syson/issues/1634[#1634] [export] Redefining an `AttributeUsage` with a _shortName_ does not properly export to the textual format.
+- https://github.com/eclipse-syson/syson/issues/1640[#1640] [export] Properly handle `UnaryOperator` during textual export.
+- https://github.com/eclipse-syson/syson/issues/1643[#1643] [export] Textual export fails to serialize a reference to an `Element` having only a _shortName_ (no _declaredName_).
+- https://github.com/eclipse-syson/syson/issues/1166[#1166] [explorer] Fix library workbench to always displays the current library at the root of the explorer.
+Libraries containing only `LibraryPackage` instances were previously displayed under the `User libraries` directory.
+- https://github.com/eclipse-syson/syson/issues/1664[#1664] [diagrams] Fix an issue where the creation of some elements inside a `ViewUsage` graphical node was creating the element at the root of the diagram instead of inside the `ViewUsage` graphical node.
+- https://github.com/eclipse-syson/syson/issues/1679[#1679] [validation] Fix AQL errors on several validation rules.
+- https://github.com/eclipse-syson/syson/issues/1680[#1680] [explorer] Fix an error where the creation of a `ViewUsage` from the _Explorer_ view was not typing the `ViewUsage` with the selected `ViewDefinition`.
+- https://github.com/eclipse-syson/syson/issues/1683[#1683] [diagrams] Fix an error where the creation of a `NamespaceImport` graphical node as first element in a diagram was not hiding "Add your first element" graphical node.
+- https://github.com/eclipse-syson/syson/issues/1688[#1688] [details] Fix an error where the _reference widget_ 's object selection popup was switching from many-valuated to mono-valuated UI when selecting an element on the _Typed By_ property on `Feature` elements.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1620[#1620] [services] Handle short names in qualified names when direct editing.
+- https://github.com/eclipse-syson/syson/issues/1636[#1636] [export] Implement `OperationExpression` using operator 'meta'.
+- https://github.com/eclipse-syson/syson/issues/1647[#1647] [import] Textual import should enforce `Feature` reference as _memberFeature_ in `EndFeatureMembership` to have _isEnd_ set to _true_.
+- https://github.com/eclipse-syson/syson/issues/1642[#1642] [export] Export `ConnectionUsage` in textual format.
+- https://github.com/eclipse-syson/syson/issues/1609[#1609] [explorer] Rework how the explorer displays libraries.
+The explorer now displays imported-by-reference libraries that only contain `LibraryPackage` in the `User libraries` directory.
+Other libraries are always displayed at the root of the explorer.
+The explorer now appends `[read-only]` to read-only models and the `KerML` and `SysML` directories.
+The explorer now appends `library-name@library-version` to imported-by-reference library models.
+- https://github.com/eclipse-syson/syson/issues/1661[#1661] [frontend] Extract the frontend extension registry in a separate file and move it from _syson_ to _syson-components_ frontend module in order to be easily used by downstream applications.
+- https://github.com/eclipse-syson/syson/issues/1681[#1681] [diagrams] Improve the way _Elements_ are displayed in the _General View_ diagram by not display them twice. The new behavior is the following: by default, when no compartment is displayed inside a graphical node, the creation of a nested _Element_ from the graphical node displays it on the diagram background and links it with the graphical node through a composition graphical edge. Then, when any compartment inside a graphical node _A_ containing a nested graphical node _B_ is displayed, then any graphical node representing _B_ and linked to graphical node _A_ through a composition graphical edge disappear.
+When a drag and drop of an _Element_ is made from the _Explorer_ view, the same behavior is applied: if the target graphical node has no candidate compartment displayed, then the dropped _Element_ is created on the diagram background and linked to the target graphical node through a composition graphical edge. If any visible compartment inside the existing graphical node corresponding the semantic parent of the dropped _Element_ is displayed, then the dropped _Element_ is created inside the target graphical node's compartment as a nested graphical node.
+In addition, two new tools are added to the palette of the _General View_ diagram:
+* Show content as Nested: allows to hide all graphical nodes linked to the selected graphical node through a composition graphical edge and show them as nested graphical nodes inside the selected graphical node.
+* Show content as Tree: allows to show all nested graphical nodes inside the selected graphical node into graphical nodes linked to the selected graphical node through a composition graphical edge and hide them as nested graphical nodes inside the selected graphical node.
+- https://github.com/eclipse-syson/syson/issues/1684[#1684] [diagrams] When a `ViewUsage` is created from any standard diagram, then a diagram is now created and associated to this `ViewUsage`.
+- https://github.com/eclipse-syson/syson/issues/1682[#1682] [explorer] Allow the creation of `InterconnectionView` diagrams from _Packages_ elements.
+- https://github.com/eclipse-syson/syson/issues/1685[#1685] [explorer] Forbid the creation of a standard diagram on a `ViewUsage` with a standard diagram.
+Remove the Delete tool from the context menu of a standard diagram.
+Users will have to delete the `ViewUsage` from the _Explorer_ view to delete the associated diagram.
+Remove the Duplicate tool from the context menu of a standard diagram.
+- https://github.com/eclipse-syson/syson/issues/1686[#1686] [diagrams] Add _New Documentation_ tool on `Package` graphical nodes in standard diagrams.
+- https://github.com/eclipse-syson/syson/issues/1689[#1689] [diagrams] Do not display _ports_ compartment when a _PortUsage_ is created from any graphical node in standard diagrams.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/1581[#1581] [diagrams] Display inherited `PortUsages` as graphical border nodes in diagrams.
+- https://github.com/eclipse-syson/syson/issues/1581[#1581] [diagrams] Redefine inherited `PortUsages` when connected as graphical border nodes.
+- https://github.com/eclipse-syson/syson/issues/1589[#1589] [explorer] Add a filter to hide expose elements in `ViewUsage`.
+- https://github.com/eclipse-syson/syson/issues/1587[#1587] [diagrams] Handle `ActionUsage` and `ActionDefinition` parameters as graphical border nodes.
+- https://github.com/eclipse-syson/syson/issues/1628[#1628] [services] Introduce new services organization.
+https://doc.mbse-syson.org/syson/main/developer-guide/index.html#services_organization[See the developer guide in the documentation for more details].
+Also introduces new `ServiceMethod` helper class to build AQL service call expressions from type-safe Java method references instead of hardcoded strings.
+- https://github.com/eclipse-syson/syson/issues/1606[#1606] [explorer] Display the _shortName_ of `Elements` as part of the label in the _Explorer_ view.
+- https://github.com/eclipse-syson/syson/issues/1638[#1638] [diagrams] Add the capability to put an `Element` graphical node inside a `ViewUsage` in diagrams
+- https://github.com/eclipse-syson/syson/issues/1584[#1584] [diagram] Add a "parts" compartment in diagrams (hidden by default)
+
+== v2025.10.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/1314[#1314] [diagrams] (Almost) All node descriptions are now synchronized (based on the exposed elements of _ViewUsages_).
+This contribution allows to switch from one _ViewDefinition_ to another one in a _ViewUsage_ without having to re-create the diagram.
+
+The following modules have been deleted:
+
+* `syson-diagram-general-view`
+* `syson-diagram-interconnection-view`
+* `syson-diagram-actionflow-view`
+* `syson-diagram-statetransition-view`
+
+New `syson-standard-diagrams-view` module handles all the graphical nodes and edges of the previous modules.
+
+All existing diagrams of these modules are automatically migrated to the remaining `syson-standard-diagrams-view` module.
+During this migration, you may lost some graphical nodes and edges that were not handled by the synchronization mechanism.
+
+This contribution introduces some breaking changes:
+
+* `AllocationUsageNodeDescriptionProvider` has been deleted. It is now handled as any other `UsageNodeDescriptionProvider`.
+* `UsageNestedActionUsageEdgeDescriptionProvider` has been deleted. It is now handled as any other `UsageNestedUsageEdgeDescriptionProvider`.
+* `SynchronizeExposedElementsInputProcessor`, `SynchronizedExposedElementsEventHandler` and `SynchronizedExposedElementsDiagramInput` have been deleted. With the new synchronization mechanism, it is no longer necessary to manually synchronize the exposed elements of a `ViewUsage` with graphical nodes of its associated diagram.
+* In `ViewCreateService`
+** `getDiagramEmptyCandidate` has been deleted
+* In `ViewEdgeService`
+** `getAllReachableAllocationUsages` has been deleted
+* In `ViewNodeService`
+** `getAllReferencingPerformActionUsages` has been deleted
+** `getAllReachableActors` has been deleted
+* In `ViewToolService`
+** `addExistingElements` has been deleted and replaced by `addToExposedElements`
+** `createTransitionUsage` has been moved to `ViewCreateService`
+** `createViewInFreeFormCompartment` has been deleted
+* In `ToolService`
+** `updateExposedElements` has been deleted and replaced by `ViewToolService#expose`
+* `NodeCreationTester` has been renamed to `ToolTester`
+
+- https://github.com/eclipse-syson/syson/issues/1497[#1497] [database] Update the PostgreSQL version used in the docker image (used for tests purposes) to 15.
+If you are using the docker image and want to upgrade to PostgreSQL 15, please refer to https://doc.mbse-syson.org/syson/main/installation-guide/migration-process.html[the migration process page of the official documentation].
+Also please remember only YEAR.MONTH.0 versions are stable and suitable for production deployments.
+Other versions, such as intermediate releases, are intended solely for testing purposes.
+- https://github.com/eclipse-syson/syson/issues/1432[#1432] [metamodel] _ImplicitSpecializationSwitch_ now requires an _ILibraryNamespaceProvider_ to access element from `LibraryPackage`.
+A default implementation is given with _org.eclipse.syson.sysml.helper.ImplicitSpecializationSwitch_.
+This new object offers a way to register immutable `LibraryPackage`.
+Any `Namespace` stored in those libraries are now cached for quick access.
+- https://github.com/eclipse-syson/syson/issues/1355[#1355] [tests] Add coding rules tests on all modules.
+As a consequence, some coding rules violations have been fixed.
+The `org.eclipse.syson.services.grammars` package in `syson-direct-edit-grammar` has been renamed into `org.eclipse.syson.direct.edit.grammars`.
+`AbtractItemUsageBorderNodeDescriptionProvider` has been renamed to `AbstractItemUsageBorderNodeDescriptionProvider`.
+- https://github.com/eclipse-syson/syson/issues/1532[#1532] [tables] Add new Requirements table View.
+As a consequence, the `syson-table-requirements-view` and `syson-common-view` modules has been created.
+`IViewDescriptionProvider.java` and `SysONViewDescriptionProvider.java` have been moved from `syson-diagram-common-view` to `syson-common-view`.
+`GetIntermediateContainerCreationSwitch.java` has been moved from `syson-application-configuration` to `syson-services`.
+- https://github.com/eclipse-syson/syson/issues/1245[#1245] [syson] Standardize read-only computation.
+The class `SysMLReadOnlyService` and the interface `ISysMLReadOnlyService` have been removed, use `IReadOnlyObjectPredicate` instead.
+- https://github.com/eclipse-syson/syson/issues/1546[#1546] [diagrams] Fix drag and drop of a graphical node from the diagram background into a _Package_ graphical node.
+As a consequence, the `ViewToolService#expose` method has been moved into `ToolService.java` and `NodeFinder.java` has been moved from `syson-diagram-common-view` to `syson-services`.
+
+
+=== Dependency update
+
+- [releng] Update to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.10.0]
+- [releng] Update to https://github.com/spring-projects/spring-boot/releases/tag/v3.5.5[Spring Boot 3.5.5]
+- [releng] Update to vite 7.1.1 and @vitejs/plugin-react 5.0.0
+- [releng] Update to vitest 3.2.4 and @vitest/coverage-v8 3.2.4
+- [releng] Update to @types/node 22.16.0 to match the version of node that we are using
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/1454[#1454] [import] Fix an issue where importing textual models with `MetadataAccessExpression` failed.
+- https://github.com/eclipse-syson/syson/issues/1487[#1487] [explorer] Fix NPE thrown by `getTreePath` on Explorers defined with Sirius Tree APIs instead of Sirius View DSL APIs.
+This issue was not visible in SysON but could appear in downstream applications defining explorers with the Sirius Tree APIs.
+- https://github.com/eclipse-syson/syson/issues/1509[#1509] [publication] Fix library update performance and ensure it does not impact standard libraries.
+- https://github.com/eclipse-syson/syson/issues/1507[#1507] [publication] The bump to Sirius Web 2025.8.3 revealed an issue with the way `UpdateLibraryExecutor` looks for proxies in the resource set.
+`SysONUpdateLibraryExecutor` was introduced to fix this issue.
+Now it has been fixed in Sirius Web 2025.8.4, `SysONUpdateLibraryExecutor` has been deleted and `UpdateLibraryExecutor` is used again.
+- https://github.com/eclipse-syson/syson/issues/1522[#1522] [diagrams] To avoid edge blinking when refreshing the diagram, we need to set the properties `measured.height` and `measured.width` with the value of the node layout data when converting a custom node accordingly to the xyflow https://reactflow.dev/learn/advanced-use/ssr-ssg-configuration#node-dimensions[documentation].
+- https://github.com/eclipse-syson/syson/issues/1545[#1545] [diagrams] Add _interconnection_ compartment to `PartDefinition` nodes in the standard diagrams.
+- https://github.com/eclipse-syson/syson/issues/1546[#1546] [diagrams] Fix drag and drop of a graphical node from the diagram background into a _Package_ graphical node.
+- https://github.com/eclipse-syson/syson/issues/1550[#1550] [diagrams] Fix an issue where the _action flow_ compartment was not revealed when the _New Start Action_ was executed.
+- https://github.com/eclipse-syson/syson/issues/1547[#1547] [diagrams] Fix an issue where the _Delete from diagram_ action did nothing on elements inside a _Package_ in diagrams.
+- https://github.com/eclipse-syson/syson/issues/1567[#1567] [diagrams] Fix an issue where a `PartUsage` contained in a `PartUsage` contained in a `Package` was not displayed, even though it was exposed in the `ViewUsage` corresponding to the diagram.
+`PartUsage` is just one example, but the same issue could appear with any other `Element` contained in `Element` contained in a `Package`.
+- https://github.com/eclipse-syson/syson/issues/1579[#1579] [diagrams] Fix an issue where the _action flow_ compartment was not revealed when the _New Decision_/_New Fork_/_New Join_/_New Merge_ tools were executed.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1452[#1452] [explorer] Contextual menu action "New objects from text" is now defined in the backend.
+By default, it no longer appears for non-SysML semantic model elements.
+Consumers may override this by providing an implementation of `org.eclipse.syson.tree.explorer.view.services.api.ISysONExplorerServiceDelegate.canCreateNewObjectsFromText(Object)`.
+- https://github.com/eclipse-syson/syson/issues/1497[#1497] [database] Update the PostgreSQL version used in the docker image (used for tests purposes) to 15.
+- https://github.com/eclipse-syson/syson/issues/1502[#1502] [libraries] Update standard libraries to SysMLv2 2025-07 specification.
+- https://github.com/eclipse-syson/syson/issues/1432[#1432] [metamodel] Add implicit `Subclassification` or `Subsetting` when using semantic `MetadataUsage`.
+- https://github.com/eclipse-syson/syson/issues/1355[#1355] [tests] Add coding rules tests on all modules.
+- https://github.com/eclipse-syson/syson/issues/1530[#1530] [details] Move `RequirementUsage`'s _ReqId_ property from the _Advanced_ tab to the _Core_ tab of the _Details View_.
+- https://github.com/eclipse-syson/syson/issues/1534[#1534] [explorer] Since it is now possible to switch from a _Standard Diagram View_ to another in SysON (for example from _General View_ to _Interconnection View_), the `ViewDefinition` name in displayed in the label of the `ViewUsage` in the _Explorer View_.
+With this enhancement, users can now easily identify which `ViewDefinition` is used by a `ViewUsage`.
+- https://github.com/eclipse-syson/syson/issues/1535[#1535] [explorer] Since it is now possible to switch from a _Standard Diagram View_ to another in SysON (for example from _General View_ to _Interconnection View_), the `ViewUsages` default name does not contain the name of the `ViewDefinition` anymore.
+With this enhancement, users avoid confusion when switching from one _ViewDefinition_ to another one in a `ViewUsage`.
+- https://github.com/eclipse-syson/syson/issues/1245[#1245] [syson] Standardize read-only computation.
+We removed the assumptions SysON made on whether a resource is read-only.
+Resources are now considered read-only if:
+* They are Sirius Web libraries imported by reference
+* They are textual SysML files imported as read-only
+* They are standard libraries (SysML and KerML)
+All the other resources are read-write.
+- https://github.com/eclipse-syson/syson/issues/1558[#1558] [doc] Add library update impact analysis in the user documentation.
+- https://github.com/eclipse-syson/syson/issues/1557[#1557] [doc] Add read-only model upload in the user documentation.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/1314[#1314] [diagrams] (Almost) All node descriptions are now synchronized (based on the exposed elements of ViewUsages).
+This contribution allows to switch from one _ViewDefinition_ to another one in a _ViewUsage_ without having to re-create the diagram.
+- https://github.com/eclipse-syson/syson/issues/1525[#1525] [diagrams] Add support for the management of the appearance of custom nodes (`Package`, `ImportedPackage`, `Note` and `ViewFrame`) with the extension point `PaletteAppearanceSectionContribution`.
+* `DiagramImporterSysMLPackageNodeStyleAppearanceChangeHandler implements IDiagramImporterNodeStyleAppearanceChangeHandler` allows the importation of diagram with `Package` nodes that have custom appearance.
+* `EditSysMLPackageNodeAppearanceEventHandler implements IDiagramEventHandler` adds the needed `appearanceChanges` to the `diagramContext` after receiving the mutation.
+* `SysMLPackageNodeAppearanceHandler implements INodeAppearanceHandler` handles how the node is updated from the `appearanceChanges`.
+* A GraphQL mutation is also added through `editSysMLPackageNodeAppearance`.
+* Same mechanism is applied to `ImportedPackage`, `Note` and `ViewFrame` nodes.
+- https://github.com/eclipse-syson/syson/issues/1532[#1532] [tables] Add new Requirements table View.
+
+== v2025.8.0
+
+=== Shapes
+
+- Added a duplicate object menu item for SysMLv2 elements in the _Explorer_ view.
+- Added a diagram tool to duplicate graphical nodes in diagrams.
+
+=== Breaking changes
+- https://github.com/eclipse-syson/syson/issues/1384[#1384] [metamodel] Aligned the metamodel with the SysMLv2 2025-04 specification released in April 2025 (see https://www.omg.org/spec/SysML/ for more details) and the KerML 2025-04 specification released in April 2025 (see https://www.omg.org/spec/KerML/ for more details).
+
+**In any case, download all your existing models/projects and back up your database before upgrading to 2025.8.0 (as always).**
+
+The new concepts are:
+
+* `InstantiationExpression` (inherits from `Expression`)
+* `ConstructorExpression` (inherits from `InstantiationExpression`)
+
+The new attributes are:
+
+* On `Feature`
+** `isConstant : EBoolean`
+* On `Usage`
+** `mayTimeVary : EBoolean`
+
+The new operations are:
+
+* On `Element`
+** `path() : EString`
+* On `Feature`
+** `isFeaturingType(Type) : EBoolean`
+** `canAccess(Feature) : EBoolean`
+* On `Type`
+** `isCompatibleWith(Type) : EBoolean`
+** `allRedefinedFeaturesOf(Membership) : Feature`
+
+The new references are:
+
+* On `Connector`
+** `defaultFeaturingType : Type`
+* On `InstantiationExpression`
+** `argument : Expression`
+
+The updates are:
+
+* The concept `FlowConnectionDefinition` has been renamed to `FlowDefinition`.
+* The concept `FlowConnectionUsage` has been renamed to `FlowUsage`.
+* The concept `SuccessionFlowConnectionUsage` has been renamed to `SuccessionFlowUsage`.
+* The concept `ItemFlow` has been renamed to `Flow`.
+** The reference `itemFlowEnd : ItemFlowEnd` has been renamed to `flowEnd : FlowEnd`.
+* The concept `ItemFlowEnd` has been renamed to `FlowEnd`.
+* The concept `SuccessionItemFlow` has been renamed to `SuccessionFlowTypeFeaturing`.
+** The reference `featuringType : Type` no longer redefines `type`.
+** The reference `featureOfType : Feature` no longer redefines `feature`.
+* The concept `ItemFeature` has been renamed to `PayloadFeature`.
+* On `MetadataAccessExpression`
+** The reference `referencedElement : Element` is now derived and subsets `member`.
+* On `FeatureMembership`
+** The reference `owningType : Type` no longer redefines `type`.
+** The reference `ownedMemberFeature : Feature` no longer redefines `feature`.
+* On `Feature`
+** The attribute `isReadOnly : EBoolean` has been renamed to `isVariable : EBoolean`.
+
+The deletions are:
+
+* The concept `Featuring`
+* The concept `LifeClass`
+* On `Membership`
+** The operation `allRedefinedFeature() : Feature`
+* On `Feature`
+** The reference `valuation : FeatureValue`
+* On `OccurrenceDefinition`
+** The reference `lifeClass : LifeClass`
+* On `Succession`
+** The reference `effectStep : Step`
+** The reference `guardExpression : Expression`
+** The reference `transitionStep : Step`
+** The reference `triggerStep : Step`
+
+All standard libraries have been updated to comply with the SysMLv2 2025-04 specification.
+All validation rules have been updated to comply with the SysMLv2 2025-04 specification.
+
+- https://github.com/eclipse-syson/syson/issues/893[#893] [explorer] Fix _Expand All_ tool in SysON _Explorer_ view
+* `ISysONExplorerFragment` implementations now need to implement `getKind()` and `getParent()`.
+* The constructors of `KerMLStandardLibraryDirectory`, `LibrariesDirectory`, `SysMLStandardLibraryDirectory`, and `UserLibrariesDirectory` now have a new `parent` parameter.
+* `ISysONExplorerService` implementations now need to implement `canExpandAll(TreeItem, IEditingContext)`
+* `ISysONExplorerServiceDelegate` implementations now need to implement `canExpandAll(TreeItem, IEditingContext)`
+
+- https://github.com/eclipse-syson/syson/issues/1422[#1422] [releng] The following files have been moved to `syson-components` and it is no longer necessary to add them to a project on top of SysON:
+* SysONDocumentTreeItemContextMenuContribution
+* SysONExtensionRegistryMergeStrategy
+* SysONObjectTreeItemContextMenuContribution
+
+=== Dependency update
+
+- [releng] Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.5.0[Spring Boot 3.5.0]
+- [releng] Switch to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.8.0]
+- https://github.com/eclipse-syson/syson/issues/1385[#1385] [releng] Switch to SysIDE 0.9.0
+- [releng] Switch to Sirius EMF-JSON 2.5.3
+- [releng] Switch to Node 22.16.0
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/893[#893] [explorer] Fix _Expand All_ tool in SysON _Explorer_ view
+- https://github.com/eclipse-syson/syson/issues/1398[#1398] [explorer] Fix an issue where a d'n'd of an `Element` in a diagram exposed the `Element` twice in the `ViewUsage` associated to the diagram.
+- https://github.com/eclipse-syson/syson/issues/1411[#1411] [syson] Fix an issue where model and diagrams referencing standard libraries elements might not correctly loaded.
+- https://github.com/eclipse-syson/syson/issues/1411[#1411] [syson] Fix an issue where model and diagrams referencing standard libraries elements might not correctly saved.
+- https://github.com/eclipse-syson/syson/issues/1407[#1407] [metamodel] Fix an issue where a `Feature` containing a `ChainingFeature` was not typed with the type of the last `ChainingFeature`.
+- https://github.com/eclipse-syson/syson/issues/1409[#1409] [import] Fix unresolved elements while importing element with `FeatureChain`.
+- https://github.com/eclipse-syson/syson/issues/1431[#1431] [import] Fix textual import issues when importing `MetadataUsage`.
+- https://github.com/eclipse-syson/syson/issues/1458[#1458] [explorer] Fix an issue where the context menu of the _Explorer_ view was loaded twice.
+- https://github.com/eclipse-syson/syson/issues/1465[#1465] [diagrams] Fix an issue where the `Actors` were not shown anymore in the _actors_ compartment.
+- https://github.com/eclipse-syson/syson/issues/1469[#1469] [rest-apis] Fix an issue where string values were used instead of literal values for primitive types when serializing with JSON.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1384[#1384] [metamodel] Align metamodel to SysMLv2 2025-04 specification released on April 2025(see https://www.omg.org/spec/SysML/ for more details) and KerML 2025-04 specification released on April 2024(see https://www.omg.org/spec/KerML/ for more details).
+- https://github.com/eclipse-syson/syson/issues/1448[#1448] [syson] Exclude referenced libraries from validation.
+- https://github.com/eclipse-syson/syson/issues/1467[#1467] [rest-apis] Make `@id` and `elementId` attributes having the same value (the `elementId` one) in JSON serialization for REST APIs.
+- https://github.com/eclipse-syson/syson/issues/1470[#1470] [rest-apis] Use alphabetical order for the JSON serialization of attributes and references of REST APIs.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/1396[#1396] [general-view] Add a graphical edge representation for `IncludeUseCaseUsage` in the  _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1405[#1405] [export] Implement the textual export of `FlowUsage`.
+
+== v2025.6.0
+
+=== Shapes
+
+- Add support for `ViewUsages` and `ViewDefinitions`
+
+=== Breaking changes
+
+- Some APIs have changed, impacting downstream applications:
+
+* `org.eclipse.syson.tree.explorer.view.services.api.ISysONDefaultExplorerService`
+** `hasChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+** `getChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+* `org.eclipse.syson.tree.explorer.view.services.api.ISysONExplorerFragment`
+** `hasChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+** `getChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+* `org.eclipse.syson.tree.explorer.view.services.api.ISysONExplorerService`
+** `hasChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+** `getChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+* `org.eclipse.syson.tree.explorer.view.services.api.ISysONExplorerServiceDelegate`
+** `hasChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+** `getChildren`: new `List<RepresentationMetadata> existingRepresentations` parameter
+
+- https://github.com/eclipse-syson/syson/issues/1350[#1350] [metamodel] _org.eclipse.syson.sysml.textual.SysMLElementSerializer.SysMLElementSerializer_ now requires to be given an implementation of _INameDeresolver_ as a constructor parameter.
+The constructor with implicit parameters has disappeared and need to be replaced by the constructor with all parameters.
+
+=== Dependency update
+
+- [releng] Switch to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.6.0]
+- [releng] Switch `@xyflow/react` to `12.6.0`
+- [releng] Switch `@mui/material` to `7.0.2`
+- [releng] Switch `@mui/icons-material` to `7.0.2`
+- [releng] Switch `@mui/x-tree-view` to `7.29.1`
+- [releng] Switch `tss-react` to `4.9.16`
+- [releng] Switch to https://www.jacoco.org/jacoco/trunk/doc/changes.html[JaCoCo 0.8.13].
+- [releng] Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.4.5[Spring Boot 3.4.5].
+- [releng] Switch to EMFJson 2.5.1.
+The following dependencies have been updated:
+* `org.eclipse.emf.ecore.xmi` from `2.16.0` to `2.38.0`
+* `org.eclipse.emf.common` from `2.21.0` to `2.31.0`
+* `org.eclipse.emf.ecore` from `2.23.0` to `2.37.0`
+* `org.eclipse.emf.edit` from `2.16.0` to `2.22.0`
+* `org.eclipse.emf.ecore.edit` from `2.13.0` to `2.15.0`
+* `org.eclipse.emf.codegen` from `2.23.0` to `2.24.0`
+* `org.eclipse.emf.codegen.ecore` from `2.25.0` to `2.39.0`
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/1258[#1258] [publication] Add required libraries as dependencies when publishing a project.
+Publishing a project that has a dependency to a library now correctly produces a library with the same dependency.
+- https://github.com/eclipse-syson/syson/issues/1259[#1259] [general-view] Fix an issue where _New Binding Connector As Usage (bind)_ tool accessible on `ItemUsage` bordered nodes was failing to create graphical edge between `ItemUsage` bordered nodes.
+- https://github.com/eclipse-syson/syson/issues/1269[#1269] [general-view] Automatically reveal new `Perform Actions` with reference from `Parts`.
+When creating a new `Perform Action` referencing an existing `Action`, all compartments containing this new element are now expanded to reveal it.
+- https://github.com/eclipse-syson/syson/issues/1272[#1272] [general-view] Fix an issue where the execution of _Add existing elements_ tool adding `Succession` with guard involving 'start' or 'done' were not well displayed.
+- https://github.com/eclipse-syson/syson/issues/1297[#1297] Fix an issue where the children of the `Package` graphical node lost their position when diagram is rendered after tab switching.
+- https://github.com/eclipse-syson/syson/issues/1300[#1300] [general-view] Fix wrong tool section name found in some compartments' palette.
+- https://github.com/eclipse-syson/syson/issues/1303[#1303] [general-view] Fix the name of `Constraint` creation tools inside `Requirement`.
+- https://github.com/eclipse-syson/syson/issues/1324[#1324] [details] Fix an issue that prevents ending up with a `null` reference in the reference widget.
+- https://github.com/eclipse-syson/syson/issues/1090[#1090] [import] Fix the textual import of `MultiplicityRange` with lower and upper bounds.
+The import now correctly creates a `MultiplicityRange` containing `LiteralInteger` elements for integer bounds, and `FeatureReferenceExpression` elements for feature bounds.
+- https://github.com/eclipse-syson/syson/issues/1318[#1318] [details] Fix an issue that prevents adding a new value to a multi-valued reference in the reference widget.
+- https://github.com/eclipse-syson/syson/issues/1331[#1331] [general-view] Fix an issue that prevents dropping a `Definition` element from the _Explorer view_ on a _General View_.
+- https://github.com/eclipse-syson/syson/issues/1321[#1321] [general-view] Prevent `TransitionUsage` graphical edges source/target reconnection to another `TransitionUsage`.
+- https://github.com/eclipse-syson/syson/issues/1263[#1236] [general-view] Improve `BindingConnectorAsUsage` to be able to create `FeatureChain` if necessary.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1192[#1192] [general-view] Add `ConnectionDefinition` in _General View_ diagram
+- https://github.com/eclipse-syson/syson/issues/1196[#1196] [general-view] Add _New Exhibit State with referenced State_ tool on `Part Usage` graphical elements.
+- https://github.com/eclipse-syson/syson/issues/1214[#1214] [export] Implement textual export of `ForkNode`.
+- https://github.com/eclipse-syson/syson/issues/1216[#1216] [export] Implement textual export of `JoinNode`.
+- https://github.com/eclipse-syson/syson/issues/1217[#1217] [export] Implement textual export of `MergeNode`.
+- https://github.com/eclipse-syson/syson/issues/1222[#1222] [general-view] Add `ItemUsage` as _bordered nodes_ of `ActionUsage` and `ActionDefinition` in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1226[#1226] [general-view] Add the possibility to create `FlowConnectionUsage` as graphical edges from `ItemUsage` _bordered nodes_ on _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1249[#1249] [import][export] Implement textual import/export of `AcceptActionUsage`.
+- https://github.com/eclipse-syson/syson/issues/1247[#1247] [explorer] Type new `ViewUsage` from _Explorer_ view with _General View_ `ViewDefinition`.
+When end-users click on _New Object_ on a semantic element, and select a `ViewUsage`, then a `ViewUsage` typed by default with the _General View_ `ViewDefinition` from the standard library will be created.
+- https://github.com/eclipse-syson/syson/issues/1252[#1252] [export] Implement textual export of `TriggerInvocationExpression`.
+- https://github.com/eclipse-syson/syson/issues/1233[#1233] [general-view] Add a creation tool of State sub actions with referenced action inside State elements
+- https://github.com/eclipse-syson/syson/issues/1255[#1255] [general-view] Improve label of `TransitionUsage` to display the "AcceptParameterPart".
+- https://github.com/eclipse-syson/syson/issues/1210[#1210] [general-view] Add the `parameters` compartment on `ActionDefinition` in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1267[#1267] [general-view] Improve the New Perform tool selection dialog to display existing actions in a tree.
+- https://github.com/eclipse-syson/syson/issues/1257[#1257] [general-view] Add the `perform actions` compartment on `PartUsage` and `PartDefinition` graphical nodes in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1277[#1277] [general-view] Add the `perform actions` compartment on `ActionUsage` and `ActionDefinition` graphical nodes in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1287[#1287] [general-view] Reduce the initial width of the `Package` graphical node.
+- https://github.com/eclipse-syson/syson/issues/1244[#1244] [details] Make `LibraryPackage`'s `isStandard` checkbox read-only in the _Details_ view.
+At the moment SysON only supports KerML and SysML, and does not support the definition of other normative model libraries.
+- https://github.com/eclipse-syson/syson/issues/1281[#1281] [syson] Prevent the loading of the editing context when querying commands in the omnibox.
+- https://github.com/eclipse-syson/syson/issues/1261[#1261] [import] Improve _New objects from text_ action in order to be able to resolve names against existing elements.
+- https://github.com/eclipse-syson/syson/issues/1294[#1294] [general-view] `StateUsages`, `StateDefinitions` and `ExhibitStates` are now able to display _state transition_ compartment.
+- https://github.com/eclipse-syson/syson/issues/1251[#1251] [explorer] Create `ViewUsage` semantic element in addition to _Diagram_ on _New representation_ menu in _Explorer_ view.
+All existing SysON _DiagramDescriptions_ (i.g. _General View_, _Interconnection View_...) have been updated to reflect the fact that they now be associated to `ViewUsages`.
+- https://github.com/eclipse-syson/syson/issues/1314[#1314] [diagrams] Synchronize `ViewUsage#exposedElement` when manipulating any SysMLv2 diagram (_General View_, _Interconnection View_, ...).
+- https://github.com/eclipse-syson/syson/issues/1322[#1322] [import] Make file extension check case-insensitive on textual import (i.e. allows to import .SYSML, .SysML, .KERML...)
+- https://github.com/eclipse-syson/syson/issues/1339[#1339] [details] Make the _Details_ view more extensible in how it determines whether an _Element_ is read-only or not.
+- https://github.com/eclipse-syson/syson/issues/1346[#1346] [general-view] Improve _direct edit_ tool on `ConstraintUsage` to be able to edit basic expressions.
+- https://github.com/eclipse-syson/syson/issues/1310[#1310] [metamodel] Revert remove derived flag for `ViewUsage#exposedElement` feature.
+- https://github.com/eclipse-syson/syson/issues/1359[#1359] [export] Implement textual export of `ViewUsage`.
+- https://github.com/eclipse-syson/syson/issues/1350[#1350] [general-view] Improve _direct edit_ tool on `Feature` to be able to edit `FeatureValue` with basic expressions.
+- https://github.com/eclipse-syson/syson/issues/1363[#1363] [general-view] Add a reveal only valued content action on the manage visibility node action that will hide empty graphical compartments and will reveal the others.
+- https://github.com/eclipse-syson/syson/issues/1357[#1357] [syson] Add support for `Resource` and `EAnnotation` in `SysONReadOnlyObjectPredicateDelegate`.
+- https://github.com/eclipse-syson/syson/issues/1368[#1368] [general-view] Add an edge representation for `FeatureValue` linking two `Features`.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/1237[#1237] [general-view] Add `ViewUsage` graphical node in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1279[#1279] [general-view] Support `ViewUsage` graphical contents in the _General View_ diagram.
+- https://github.com/eclipse-syson/syson/issues/1336[#1336] [general-view] Add manage visibility node action on `Definition` and `Usage` graphical nodes element in the _General View_ diagram.
+
+== v2025.4.0
+
+=== Shapes
+
+- Add support for library publication
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/1079[#1079] [metamodel] Align metamodel to SysMLv2 2024-12 specification released on December 2024(see https://www.omg.org/spec/SysML/ for more details) and KerML 2024-12 specification released on December 2024(see https://www.omg.org/spec/KerML/ for more details).
+Please download all your models/projects before upgrading to 2025.4.0.
+The new concepts are:
+* `CrossSubsetting` (inherits from `Subsetting`)
+* `IndexExpression` (inherits from `OperatorExpression`)
+The new operations are:
+* `Usage#referencedTargetFeature()`
+* `Type#supertypes(EBoolean)`
+* `Type#removedRedefinedFeatures(Membership)`
+* `Type#nonPrivateMemberships(Namespace, Type, EBoolean)`
+* `Type#inheritableMemberships(Namespace, Type, EBoolean)`
+* `Type#multiplicities()`
+* `Namespace#membershipsOfVisibility(VisibilityKind, Namespace)`
+* `Membership#allRedefinedFeatures()`
+* `Feature#allRedefinedFeatures()`
+* `Feature#asCartesianProduct()`
+* `Feature#isCartesianProduct()`
+* `Feature#isOwnedCrossFeature()`
+* `Feature#ownedCrossFeature()`
+The new references are:
+* `CrossSubsetting#crossedFeature`
+* `CrossSubsetting#crossingFeature`
+* `Feature#crossFeature`
+* `Feature#ownedCrossSubsetting`
+* `Annotation#ownedAnnotatingElement`
+* `AnnotatingElement#owningAnnotatingRelationship`
+* `FlowConnectionDefinition#flowConnectionEnd`
+The modifications are:
+* `Usage#nestedConnection` now subsets `Usage#nestedUsage` instead of `Usage#nestedPart`
+* `CaseDefinition#subjectParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `CaseDefinition#objectiveRequirement` now subsets `Definition#usage` instead of `Usage#ownedRequirement`
+* `CaseDefinition#actorParameter` now subsets `Definition#usage` instead of `Usage#ownedPart`
+* `CaseUsage#subjectParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `CaseUsage#objectiveRequirement` now subsets `Usage#usage` instead of `Usage#nestedRequirement`
+* `CaseUsage#actorParameter` now subsets `Usage#usage` instead of `Usage#nestedPart`
+* `RequirementDefinition#subjectParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementDefinition#stakeholderParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementDefinition#actorParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementUsage#subjectParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `RequirementUsage#stakeholderParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `RequirementUsage#actorParameter` now subsets `Usage#usage` instead of `Usage#nestedPart`
+* `Type#inheritedMemberships`
+** `excluded` parameter renamed to `excludedTypes`
+** new `excludedNamespaces : Namespace [0..\*]` parameter
+* `MultiplicityRange#bound` now subsets `Namespace#ownedMember` instead of redefining it
+* `InvocationExpression#operand` has been deleted
+* `FlowConnectionUsage` now inherits from `ConnectorAsUsage` instead of `ConnectionUsage`
+* `Definition#ownedConnection` now subsets `Definition#ownedUsage` instead of `Definition#ownedPart`
+* `Annotation#annotatingElement` is now derived
+* `AnnotatingElement#annotation` is now derived
+* `FlowConnectionDefinition` do not inherits from `ConnectionDefinition` anymore
+* `FlowConnectionUsage#flowConnectionDefinition` do not redefines `ConnectionUsage#connectionDefinition` anymore
+All standard libraries have been updated to comply with the SysMLv2 2024-12 specification.
+All validation rules have been updated to comply with the SysMLv2 2024-12 specification.
+- https://github.com/eclipse-syson/syson/issues/1030[#1030] [metamodel] The _source_ and _target_ features are no longer editable on all concepts inheriting from `ConnectorAsUsage`.
+
+- https://github.com/eclipse-syson/syson/issues/1093[#1093] [diagrams] Handle TransitionUsage between ActionUsages in diagrams :
+
+The `SysMLElementSerializer` is now used to display the guard expressions on the label of the `TransitionUsages`.
+To avoid creating a dependency to _syson-sysml-export_ from the modules holding the _View_ descriptions, all the code that converts a SysML model to its textual format has been moved to _syson-sysml-metamodel_.
+As a consequence the following classes have been moved from the package _org.eclipse.syson.sysml.export_ to _org.eclipse.syson.sysml.textual_:
+
+* _SysMLElementSerializer_
+* _Appender_
+* _NameDeresolver_
+* _Severity_
+* _Status_
+* _SysMLKeywordSwitch_
+* _SysMLRelationPredicates_
+
+All matching tests have also been moved.
+
+- [rest-apis] Allow createCommit REST API to amend commit.
+`SysMLv2RestDataVersionPayloadSerializerService` has been deleted.
+There is no more need for a specific serializer for this `RestDataVersion#payload` attribute, because `RestDataVersion#payload` is now typed with a `Map<String, Object>` instead of `Object`.
+The `Map<String, Object>` is handled by the default serializer/deserializer.
+`RestDataVersionRequest#payload` is now typed by a `Map<String, Object>` instead of `IRestDataRequest`.
+
+- [test] The integration tests have been refactored.
+The initialization SQL scripts have been split in smaller pieces.
+The class _SysMLv2Identifiers_ has also been split in:
+
+* _XXXTestProjectData_ : which contains all required data for test on a specific project.
+* _SysONRepresentationDescriptionIdentifiers_ : which contains the representation description IDs.
+
+=== Dependency update
+
+- [releng] Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.4.4[Spring Boot 3.4.4].
+- [releng] Switch to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.4.0]
+- [releng] Switch to Turbo 2.4.4
+- [releng] Switch to @xyflow 12.4.4
+- [releng] Switch to Sirius EMF-JSON 2.4.0
+
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/870[#870] [metamodel] Fix an issue while computing the name of `VariantMembership`. 
+- https://github.com/eclipse-syson/syson/issues/1083[#1083] [metamodel] Fix an issue where resolving against "unrestricted" name did not work
+- https://github.com/eclipse-syson/syson/issues/1075[#1075] [import] Fix a ClassCastException thrown while importing a model with a name conflict.
+- https://github.com/eclipse-syson/syson/issues/1091[#1091] [export] Fix `FeatureReferenceExpression` export for elements that should be exported as qualified names.
+Exporting a SysML model containing a `FeatureReferenceExpression` now correctly produces qualified names where it should.
+- https://github.com/eclipse-syson/syson/issues/1077[#1077] [explorer] Fix navigation in case of project containing both sysml and non-sysml model elements
+- https://github.com/eclipse-syson/syson/issues/1029[#1029] [metamodel] Fix an issue where the resolution of the names of elements accessed using implicit specialization failed.
+- https://github.com/eclipse-syson/syson/issues/1148[#1148] [metamodel] Fix computation of `SuccessionAsUsage` source and target feature when using implicit source/target.
+- https://github.com/eclipse-syson/syson/issues/1158[#1158] [import] Fix imported `TransitionFeatureKind` value on accept and do `TransitionFeatureMembership`
+Importing an "accept" `TransitionFeatureMembership` now correctly sets its kind to `trigger`.
+Importing a "do" `TransitionFeatureMembership` now explicitly sets its kind to `effect`.
+- https://github.com/eclipse-syson/syson/issues/1164[#1164] [import] Fix imported `RequirementConstraintKind` value on require and assume `RequirementConstraintMembership`
+Importing a "require" `RequirementConstraintMembership` now correctly sets its kind to `requirement`.
+Importing an "assume" `RequirementConstraintMembership` now explicitly sets its kind to `assumption`.
+- https://github.com/eclipse-syson/syson/issues/1154[#1154] [import] Fix import of `TextualRepresentation`.
+- https://github.com/eclipse-syson/syson/issues/1169[#1169] [syson] Add a new navigation bar menu icon on the top right corner of the appliation.
+- https://github.com/eclipse-syson/syson/issues/1172[#1172] [import] Uniformize the import of `LiteralString` value.
+The `value` field of imported `LiteralString` elements does not contain double quotes anymore.
+This behavior is aligned with how SysON handles quotes in `declaredName` fields.
+- https://github.com/eclipse-syson/syson/issues/1173[#1173] [export] Fix the textual export of `LiteralString` not wrapped in double quotes.
+The user had to explicitly add the double quotes around a `LiteralString` value to ensure the export was producing valid SysML.
+This is not the case anymore.
+- https://github.com/eclipse-syson/syson/issues/1176[#1176] [general-view] Fix the creation of `TransitionUsage` from an `ActionUsage` to the "Done" ActionUsage.
+- https://github.com/eclipse-syson/syson/issues/1183[#1183] [metamodel] Fix `Element#isLibraryElement` for elements inside `LibraryPackage`.
+The attribute is now correctly `true` for elements contained in the ownership tree of a `LibraryPackage`.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/1061[#1061] [general-view] Add ellipsis on `Packages` label, to provide visual feedback on name overflow.
+- https://github.com/eclipse-syson/syson/issues/1007[#1007] Improve direct edit on Feature elements to be able to set the `isDefault` and `isInitial` properties
+- https://github.com/eclipse-syson/syson/issues/1033[#1033] [explorer] Make it possible to create a diagram representation directly under a `root Namespace` element
+- https://github.com/eclipse-syson/syson/issues/960[#960] [general-view] In the selection dialog of the `subject` creation tool, display possible `Usage` candidates in a tree instead of a list.
+- https://github.com/eclipse-syson/syson/issues/1028[#1028] [import] Improve handling of `SuccessionAsUsage` with implicit source feature. 
+- https://github.com/eclipse-syson/syson/issues/938[#938] [general-view] Add `Satisfy Requirement Usage` to General View diagram.
+A new creation tool is available in the `Requirements` section of the palette, allowing the creation of `Satisfy Requirement Usage` objects.
+A new dra & drop tool is available on the diagram, allowing moving `Satisfy Requirement Usage` graphical nodes on the diagram.
+- [explorer] The `General View` diagram is now proposed first when creating a diagram.
+- https://github.com/eclipse-syson/syson/issues/1024[#1024] [diagrams] Allow `Usage` and `Definition` graphical node labels to be wrapped to handle long names more easily.
+- https://github.com/eclipse-syson/syson/issues/1030[#1030] [metamodel] `ConnectorAsUsage.getSourceFeature` and `ConnectorAsUsage.getTargetFeature` should redefine `Relationship.source` and `Relationship.target` features
+- https://github.com/eclipse-syson/syson/issues/1042[#1042] [import] Improve textual import of `SuccessionAsUsage` which define a new target action directly after the 'then' keyword.
+- https://github.com/eclipse-syson/syson/issues/1045[#1045] [export] Improve textual export by properly handle named `SuccessionAsUsage`.
+- https://github.com/eclipse-syson/syson/issues/1080[#1080] [import] Improve textual import and resolution against `ConjugatedPorts`.
+- https://github.com/eclipse-syson/syson/issues/1048[#1048] [import] Improve textual import of `TransitionUsage` by handling _implicit_ source property.
+- https://github.com/eclipse-syson/syson/issues/1094[#1094] [import] Improve textual import of `TransitionUsage` by handling guards.
+- https://github.com/eclipse-syson/syson/issues/1105[#1105] [metamodel] Implement `ConnectionDefinition` derived references and operations in SysON SysMLv2 metamodel.
+- https://github.com/eclipse-syson/syson/issues/1093[#1093] [general-view] Handle TransitionUsage in GeneralView diagram
+- https://github.com/eclipse-syson/syson/issues/1113[#1113] Update Batmobile project example
+- https://github.com/eclipse-syson/syson/issues/1037[#1037] [general-view] Add "Add existing nested element" tool on the Action Flow compartment on the General View Diagram.
+- https://github.com/eclipse-syson/syson/issues/1122[#1122] [metamodel] Add support for implicit parameter redefinition
+Parameters of `Behavior` and `Step` now implicitly redefine the matching parameters of `Behavior` subclassifications and `Step` specializations.
+See KerML 7.4.7.2 and 7.4.7.3 for more information.
+These implicit redefinitions are not visible in the diagrams nor the explorer (like all the other implicit specializations).
+The importer can now import SysML files that contain `FeatureChainingExpression` relying on these implicit redefinitions.
+- https://github.com/eclipse-syson/syson/issues/1120[#1120] [general-view] Add a graphical edge to represent the composition between `OccurrenceDefinition` and its `OccurrenceUsages`.
+- https://github.com/eclipse-syson/syson/issues/1125[#1125] [general-view] Simplify "Done" and "Start" actions
+- https://github.com/eclipse-syson/syson/issues/1131[#1131] [diagrams] Allow `NamespaceImport` graphical node labels to be wrapped to handle long names more easily.
+- https://github.com/eclipse-syson/syson/issues/1143[#1143] [export] Implement textual export of `Decision Transition Usages`.
+- https://github.com/eclipse-syson/syson/issues/1147[#1147] [export] Implement textual export of `DecisionNode`.
+- https://github.com/eclipse-syson/syson/issues/1141[#1141] [general-view] Add `PortUsages` as border nodes in General View.
+- https://github.com/eclipse-syson/syson/issues/1155[#1155] [publication] Remove the imported `EAnnotation` from published libraries
+This annotation conflicts with the behavior of the _import by copy_ feature, which should allow the user to edit the content of the imported library.
+This was not possible for libraries containing `LibraryPackage` instances, which were always read-only, regardless of the import kind.
+- https://github.com/eclipse-syson/syson/issues/1160[#1160] [details] Use textarea widget for "body" property on `Comment`, `Documentation` and `TextualRepresentation` (instead of textfield widget).
+- https://github.com/eclipse-syson/syson/issues/1152[#1152] [general-view] Add `TextualRepresentation` in General View diagram.
+- https://github.com/eclipse-syson/syson/issues/1177[#1177] [syson] Add new SysMLv2 Library template allowing to create a project composed with a simple model with only one element: a `LibraryPackage`.
+- https://github.com/eclipse-syson/syson/issues/1162[#1162] [export] Implement textual export of `TextualRepresentation`.
+- https://github.com/eclipse-syson/syson/issues/1200[#1200] [general-view] Display `Comments` on `Dependency` graphical edges.
+- https://github.com/eclipse-syson/syson/issues/1200[#1200] [general-view] Add `Comment` creation tool on `Dependency` graphical edges.
+- https://github.com/eclipse-syson/syson/issues/1198[#1198] [general-view] Add edge tools on `PortUsage` border nodes in the General View
+- https://github.com/eclipse-syson/syson/issues/1223[#1223] [general-view] Add `Comment` creation tool on `TransitionUsage` graphical edges.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/1078[#1078] [publication] Add support for publishing the SysML contents of a project as a library.
+- https://github.com/eclipse-syson/syson/issues/1109[#1109] [publication] Add support for importing published libraries as dependencies of a project.
+- https://github.com/eclipse-syson/syson/issues/1118[#1118] [publication] Add support for updating the version of a library used as a dependency of a project.
+
+
+== v2025.2.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/987[#987] Implementation of drag and drop in SysOn Explorer view
+* A new service has been added to centralize the behavior of moving semantic elements in _org.eclipse.syson.services.api.ISysMLMoveElementService_.
+It replaces the public methods _UtilService.moveMembership_ and _ToolService.moveSemanticElement_
+* A new service has been added to centralize the verification of read-only elements in _org.eclipse.syson.services.api.ISysMLReadOnlyService_.
+- https://github.com/eclipse-syson/syson/issues/1018[#1018] `SysMLStandardLibrariesConfiguration` has been refactored and renamed `SysONDefaultLibrariesConfiguration`.
+
+=== Dependency update
+
+- Switch to Sirius Web 2025.2.0
+- https://github.com/eclipse-syson/syson/issues/953[#953] [rest-apis] Backend module `syson-sysml-rest-api-services` now depends on `jackson-datatype-jsr310` for JSON dates serialization
+- https://github.com/eclipse-syson/syson/issues/1023[#1023] [releng] Switch to SysIDE 0.8.0
+- Upgrade `turbo` to version 2.3.3
+- Switch to Spring Boot 3.4.1
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/953[#953] [rest-apis] Fix an issue where the server could crash when successive REST APIs calls are executed.
+More precisely, the dates fields were not serialized correctly.
+- https://github.com/eclipse-syson/syson/issues/961[#961] [core] Fix an issue where default names of Elements were sometimes invalid because corresponding to SysMLv2 keywords.
+New default names now includes a number, this number corresponding to the count of Elements of the same kind in the scope.
+- https://github.com/eclipse-syson/syson/issues/965 [export] Fix an issue where downloading of standard libraries pointed at 404 error.
+They are now properly downloaded.
+Export to textual SysMLv2 is not fully implemented yet so there are still unhandled cases.
+- https://github.com/eclipse-syson/syson/issues/998[#998] Fix `Port Usage` labels in diagrams.
+- https://github.com/eclipse-syson/syson/issues/1002[#1002] Invalid label for `Usages` (e.g.: `Attribute Usage`) when their `Feature Value` aims to define "initial" value.
+- https://github.com/eclipse-syson/syson/issues/1003[#1003] Invalid label for `Usages` (e.g.: `Attribute Usage`) when their `Feature Value` aims to define "default" value.
+- https://github.com/eclipse-syson/syson/issues/1020[#1020] [general-view] The multiplicity should not be displayed on edges.
+- https://github.com/eclipse-syson/syson/issues/1009[#1009] [metamodel] Fix an issue where the diagram direct edit on graphical nodes could raise a backend error on unsettable enum attributes.
+- https://github.com/eclipse-syson/syson/issues/1052[#1052] [general-view] Fix an issue where the execution of "New Port In/Inout/Out" tools was failing.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/897[#897] [general-view] Add `Concern Definition` to General View diagram.
+A new node creation tool is available in the `Requirements` section of the palette, allowing the creation of `Concern Definition` objects.
+A new drop node tool is available on the diagram, allowing representing `Concern Definition` objects as nodes of the diagram.
+- https://github.com/eclipse-syson/syson/issues/899[#899] [general-view] Add `Concern Usage` to General View diagram.
+A new node creation tool is available in the `Requirements` section of the palette, allowing the creation of `Concern Usage` objects.
+A new drop node tool is available on the diagram, allowing representing `Concern Usage` objects as nodes of the diagram.
+- https://github.com/eclipse-syson/syson/issues/936[#936] [general-view] Add compartment for the 'StakeholderParameter' of `Concern Definition`, `Concern Usage`, `Requirement Definition`, `Requirement Usage` to the General View diagram.
+In the palette of the 'stakeholders' compartment, the creation tool 'New Stakeholder' allows selecting an `Item Usage` or `Item Definition` to add as stakeholder.
+- https://github.com/eclipse-syson/syson/issues/941[#941] [details] Prevent edition of imported user libraries from the details view.
+- https://github.com/eclipse-syson/syson/issues/946[#946] [metamodel] Align metamodel to SysMLv2 and KerML Beta 2.3 specifications.
+The changes are:
+* TransitionUsage
+** new operation `sourceFeature() : Feature`
+* New class TerminateActionUsage
+** with new derived reference `terminatedOccurrenceArgument : Expression`
+- https://github.com/eclipse-syson/syson/issues/946[#946] [libraries] All standard libraries have been updated to comply with the SysML Beta 2.3 specification.
+- https://github.com/eclipse-syson/syson/issues/982[#982] [metamodel] `Membership#isDistinguishableFrom` derived attribute has been implemented.
+- https://github.com/eclipse-syson/syson/issues/992[#992] [export] Implement SysML export of `ConcernDefinition`, `ConcernUsage` and `StakeholderMembership`
+- https://github.com/eclipse-syson/syson/issues/960[#960] [general-view] In the selection dialog of the creation tools for `Stakeholders` and `Actors`, display possible `Part Usage` candidates in a tree instead of a list.
+- https://github.com/eclipse-syson/syson/issues/1012[#1012] [general-view] Allow `Package` and `NamespaceImport` graphical nodes to be smaller than their default size
+- https://github.com/eclipse-syson/syson/issues/1006[#1006] [details] Display `FeatureValue.isDefault` and `FeatureValue.isInitial` in Core tab of `FeatureValue` concept.
+- https://github.com/eclipse-syson/syson/issues/1018[#1018] [libraries] Make customizing the default metamodels and libraries available in SysML projects easier by making default implementation `SysONDefaultLibrariesConfiguration.java` more extensible.
+To do so, create a `@Primary @Configuration` component that extend `SysMLDefaultLibrariesConfiguration`, and optionally redefine `getDefaultLibraries()` method and/or `getDefaultEPackages()`.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/977[#977] [validation] SysON now implements the constraints (a.k.a. validation rules) from the SysMLv2 specification.
+The _Validation_ view show the results of the execution of the constraints on your models.
+- https://github.com/eclipse-syson/syson/issues/987[#987] Implementation of drag and drop in Explorer view.
+- https://github.com/eclipse-syson/syson/issues/1000[#1000] Add support for semantic undo redo.
+
+
+== v2025.1.0
+
+=== Shapes
+
+- Improve support for libraries in the explorer
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/796[#796] [import] Improve the code in the import module to make it more generic:
+* Delete the `AstConstants` class: Constants have been split across several classes.
+* Delete the `LogBook` class (no longer used).
+* Replace `AstContainmentReferencePart` with `ContainmentReferenceHandler`.
+* Replace `AstObjectParser` with `EAttributeHandler`.
+* Replace `AstWeakReferenceParser` with `NonContainmentReferenceHandler`.
+* Delete `ReferenceHelper` (no longer used).
+* Delete `SysMLUploadDocumentReportProvider` as it is not functional.
+* Most components used in the transformation now require a `MessageReporter` instance to collect transformation messages.
+- https://github.com/eclipse-syson/syson/issues/887[#887] [explorer] Rework the structure of standard and user libraries in the explorer:
+* Rename `StandardLibraryDirectory` to `LibrariesDirectory`.
+* Rename `ReferencedLibraryDirectory` to `UserLibrariesDirectory`.
+- https://github.com/eclipse-syson/syson/issues/906[#906] [explorer] Ensure that a non-library imported model is not moved into the _User libraries_ directory when a _LibraryPackage_ is created in it.
+`ElementUtil#setIsImported(Resource)` has been updated to `ElementUtil#setIsImported(Resource, boolean)` to reflect this change.
+
+=== Dependency update
+
+- [releng] Switch to Sirius Web 2025.2.0
+- [releng] Upgrade `turbo` to version 2.3.3 (from 1.13.3 before)
+The `start` task used in our turbo configuration is now marked as `persistent` and as a result we have separated the `start` script from `syson` used to run the frontend in dev from from the `start` script from other packages used to build them in development mode by renaming the later to `build-dev`.
+- [releng] Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.4.1[Spring Boot 3.4.1].
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/868[#868] [export] Fix textual export of `LibraryPackage`
+- https://github.com/eclipse-syson/syson/issues/883[#883] [explorer] Fix `getChildren` error with specific filter combinations.
+The explorer now correctly allows to expand elements when the _Hide Root Namespaces_ filter is disabled and the `Hide KerML/SysML Standard Libraries` filter is enabled.
+- https://github.com/eclipse-syson/syson/issues/884[#884] [related-elements] Fix an issue where some error messages were displayed when an element with implicit Specialization was selected and the Related Elements View was displayed.
+- https://github.com/eclipse-syson/syson/issues/895[#895] [explorer] Fix deletion of imported models from the explorer.
+Users can now delete imported library _models_ (i.e. models with a `LibraryPackage` element), but they cannot edit them nor delete elements inside them.
+Imported models that do not contain libraries can be modified as regular models created in the project.
+- https://github.com/eclipse-syson/syson/issues/906[#906] [explorer] Ensure that a non-library imported model is not moved into the _User libraries_ directory when a _LibraryPackage_ is created in it.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/829[#829] [metamodel] `OccurrenceUsag#portionKind` is now unsettable and its default value is `null`.
+- https://github.com/eclipse-syson/syson/issues/796[#796] [import] Improve the code in import module, by making it more generic
+- https://github.com/eclipse-syson/syson/issues/818[#818] [export] Add partial support of `OccurrenceDefinition` and 'OccurrenceUsage` in export from model to textual SysMLv2.
+- https://github.com/eclipse-syson/syson/issues/875[#875] [explorer] Improve the support of libraries in the explorer.
+The explorer now contains 2 directories:
+*  _Standard Libraries_: contains the SysML and KerML libraries
+* _Referenced Libraries_: contains non-standard libraries imported by the user
+- https://github.com/eclipse-syson/syson/issues/887[#887] [explorer] Rework the structure of standard and user libraries in the explorer.
+The explorer now contains the following directories for libraries:
+* _Libraries_: top-level container for all the libraries used in the project
+** _KerML_: KerML standard libraries
+** _SysML_: SysML standard libraries
+** _User Libraries_: User-imported libraries
+- https://github.com/eclipse-syson/syson/issues/888[#888] [explorer] Remove 'New objects from text' contextual menu entry for libraries.
+- https://github.com/eclipse-syson/syson/issues/901[#901] [import] Allow to import `.kerml` textual files.
+- https://github.com/eclipse-syson/syson/issues/889[#889] [explorer] Remove 'New object' and 'New representation' contextual menu entries for libraries.
+- https://github.com/eclipse-syson/syson/issues/919[#919] [explorer] Remove Sirius Web default explorer.
+The SysON Explorer is now the default explorer for SysON, and the Sirius Web explorer cannot be used anymore.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/802[#802] [diagrams] Handle imported package elements in diagrams.
+- https://github.com/eclipse-syson/syson/issues/908[#908] [diagrams] Organize all palette tools.
+A new palette is available in SysON, all tools have been organized in sections.
+This new palette is draggable, and contains a search bar, allowing to easily retrieve tools by their name.
+
+== v2024.11.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/699[#699] [general-view] Add CaseUsage and CaseDefinition in General View diagram.
+The following classes have been renamed to reflect their new usage:
+* Rename `UseCaseDefinitionActorsCompartmentNodeDescriptionProvider` to `CaseDefinitionActorsCompartmentNodeDescriptionProvider`
+* Rename `UseCaseDefinitionObjectiveRequirementCompartmentNodeDescriptionProvider` to `CaseDefinitionObjectiveRequirementCompartmentNodeDescriptionProvider`
+* Rename `UseCaseDefinitionSubjectCompartmentNodeDescriptionProvider` to `CaseDefinitionSubjectCompartmentNodeDescriptionProvider`
+* Rename `UseCaseUsageActorsCompartmentNodeDescriptionProvider` to `CaseUsageActorsCompartmentNodeDescriptionProvider`
+* Rename `UseCaseUsageObjectiveRequirementCompartmentNodeDescriptionProvider` to `CaseUsageObjectiveRequirementCompartmentNodeDescriptionProvider`
+* Rename `UseCaseUsageSubjectCompartmentNodeDescriptionProvider` to `CaseUsageSubjectCompartmentNodeDescriptionProvider`
+- https://github.com/eclipse-syson/syson/issues/717[#717] [import] The following methods have been deleted:
+* Deleted `AstTreeParser#resolveAllImport`
+* Deleted `AstTreeParser#resolveAllReference`
+* Deleted `ProxyResolver#resolveAllProxy`
+- https://github.com/eclipse-syson/syson/issues/754[#754] [general-view] Add an edge tool to add target element as nested usage.
+The following methods have been moved from `NodeCreationTestsService` to `SemanticCheckerService` to better separate testing concerns:
+* `getElementInParentSemanticChecker`
+* `checkEditingContext`
+The following methods have been moved from `NodeCreationTestsService` to `DiagramCheckerService` to better separate testing concerns:
+* `getChildNodeGraphicalChecker`
+* `getCompartmentNodeGraphicalChecker`
+* `getSiblingNodeGraphicalChecker`
+* `checkDiagram`
+- https://github.com/eclipse-syson/syson/issues/765[#765] [diagrams] Remove default name of relationships and improve edge labels.
+The method `getSuccessionLabel` in `ViewLabelService` has been deleted, succession labels are now computed with the generic `getEdgeLabel` method.
+- https://github.com/eclipse-syson/syson/issues/771[#771] [diagrams] Allow the drop of elements on empty diagram nodes.
+Rename the class `SemanticCheckerFactory` to `SemanticRunnableFactory` to reflect the new use cases of the class.
+- https://github.com/eclipse-syson/syson/issues/803[#803] [metamodel] Align metamodel to SysMLv2 and KerML Beta 2.2 specifications.
+The changes are:
+* Import
+** visibility attribute default value is now `private` instead of `public`
+* Type
+** inheritedMemberships operation now have a second parameter, `excludeImplied : boolean`
+* Feature
+** new `featureTarget : Feature` derived reference
+** new `typingFeatures : List<Feature>` operation
+* InvocationExpression
+** new `operand : List>Expression>` derived reference
+* AnalysisCaseUsage
+** remove `analysisAction : ActionUsage` reference
+* AnalysisCaseDefinition
+** remove `analysisAction : ActionUsage` reference
+- https://github.com/eclipse-syson/syson/issues/807[#807] [releng] Extract direct edit grammar from services module into separate module (new `syson-direct-edit-grammar` module).
+
+=== Dependency update
+
+- [releng] Switch to Spring Boot 3.3.3
+- [releng] Migrate the frontend to `react 18.3.1`, `react-dom 18.3.1`, `react-router-dom 6.26.0`, `@xstate/react: 3.0.0` and `@ObeoNetwork/gantt-task-react 0.6.0`
+- [releng] Switch to Sirius Web 2024.11.0
+- [releng] Switch to the final release version of AQL 8.0.2
+- [releng] Switch to @ObeoNetwork/gantt-task-react 0.6.1 to benefit for enhancements
+- [releng] Add a dependency to `material-react-table "2.13.3"` and `export-to-csv "1.3.0"`
+- [releng] Switch to `commons-io 2.17` 
+- [releng] Switch to `java-uuid-generator 5.1.0`
+- https://github.com/eclipse-syson/syson/issues/810[#810] [releng] Switch to SysIDE 0.6.2
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/744[#744] [import] Fix containment of imported Allocation and AllocationDefinition.
+- https://github.com/eclipse-syson/syson/issues/777[#777] [import] Fix import of some boolean attributes (`Type#isAbstract`, `Feature#isDerived`, `Feature#isEnd`, `Feature#isReadOnly`).
+- https://github.com/eclipse-syson/syson/issues/795[#795] [import] Fix an issue where the import failed to resolve `redefinedFeature` references when the `Redefinition` had no name.
+- https://github.com/eclipse-syson/syson/issues/817[#817] [interconnection-view] Fix an issue where `InterfaceUsage` and `FlowConnectionUsage` elements might be created inside the wrong membership.
+- https://github.com/eclipse-syson/syson/issues/740[#740] [export] Fix missing `declaredName` after exporting an `AnnotatingElement`.
+- https://github.com/eclipse-syson/syson/issues/812[#812] [export] Fix visibility issue when resolving name of privately imported element during export.
+- https://github.com/eclipse-syson/syson/issues/836[#836] [services] Fix an issue where it was impossible anymore to delete the cardinality of a `Usage` as graphical node through direct edit.
+- https://github.com/eclipse-syson/syson/issues/838[#838] [services] Fix an issue where `Subsetting` elements were not deleted at the same time as the deletion of their subsetted `Feature`.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/699[#699] [general-view] Add CaseUsage and CaseDefinition in General View diagram.
+- https://github.com/eclipse-syson/syson/issues/746[#746] [syson] Update Batmobile template.
+- https://github.com/eclipse-syson/syson/issues/717[#717] [import] Handle of aliases and external references have been improved.
+- https://github.com/eclipse-syson/syson/issues/756[#756] [diagrams] Add short name in container and compartment item labels.
+- https://github.com/eclipse-syson/syson/issues/760[#760] [diagrams] Allow to set short name via direct edit.
+- https://github.com/eclipse-syson/syson/issues/761[#761] [details] Make Declared Short Name accessible from the Core tab.
+- https://github.com/eclipse-syson/syson/issues/765[#765] [diagrams] Remove default name of relationships and improve edge labels.
+- https://github.com/eclipse-syson/syson/issues/767[#767] [explorer] Allow to create dependencies from the Explorer view.
+- https://github.com/eclipse-syson/syson/issues/771[#771] [diagrams] Allow the drop of elements on empty diagram nodes.
+- https://github.com/eclipse-syson/syson/issues/775[#775] [syson] Exclude `src/test/resources` from checkstyle.
+This reduces the time required to build SysON, especially when using Spring Tool Suite.
+- https://github.com/eclipse-syson/syson/issues/779[#779] [diagrams] Add `New Subsetting` tool on `PartUsage` to create a `Subsetting` edge and a `PartUsage` that is subset.
+- https://github.com/eclipse-syson/syson/issues/780[#780] [diagrams] Add `New Feature Typing` tool on `PartUsage` to create a `FeatureTyping` edge and a `PartDefinition`
+- https://github.com/eclipse-syson/syson/issues/785[#785] [interconnection-view] Add `New Binding Connector As Usage` tool on `PartUsage` in Interconnection View diagram.
+- https://github.com/eclipse-syson/syson/issues/789[#789] [interconnection-view] Add `New Flow Connection` tool on `PartUsage` in Interconnection View diagram.
+- https://github.com/eclipse-syson/syson/issues/790[#790] [interconnection-view] Add `New Interface` tool on `PartUsage` in Interconnection View diagram.
+- https://github.com/eclipse-syson/syson/issues/799[#799] [export] Handle `UseCaseUsage` and `IncludeUseCaseUsage` elements.
+- https://github.com/eclipse-syson/syson/issues/803[#803] [libraries] All standard libraries have been updated to comply with the SysML Beta 2.2 specification.
+- https://github.com/eclipse-syson/syson/issues/805[#805] [import] Improve non regression tests.
+Added source sysml file and unaltered ast.json result.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/694[#694] [diagrams] Add a new custom node note among possible node style descriptions.
+- https://github.com/eclipse-syson/syson/issues/695[#695] [diagrams] Add Documentation element as graphical node in all diagrams.
+- https://github.com/eclipse-syson/syson/issues/731[#731] [explorer] Allow creation of Comment from the Explorer view.
+- https://github.com/eclipse-syson/syson/issues/696[#696] [diagrams] Add Comment element as graphical node in all diagrams.
+- https://github.com/eclipse-syson/syson/issues/697[#697] [details] Add Comment property to Core tab of the Details view.
+- https://github.com/eclipse-syson/syson/issues/754[#754] [general-view] Add an edge tool to add target element as nested usage.
+This complements the existing tool that allows to add the source element as a nested usage of the target.
+- https://github.com/eclipse-syson/syson/issues/824[#824] [rest-api] Introduce partial support of the standard REST APIs from the OMG [SystemsModelingAPI](https://www.omg.org/spec/SystemsModelingAPI/).
+In this first implementation we will only implement the following REST APIs, thanks to Sirius Web:
+*Project-related REST APIs:
+** getProjects (GET /api/rest/projects): Get all projects.
+** getProjectById (GET /api/rest/projects/{projectId}): Get project with the given id (projectId).
+** createProject (POST /projects): Create a new project with the given name and description (optional).
+** deleteProject (DELETE /api/rest/projects/{projectId}): Delete the project with the given id (projectId).
+** updateProject (PUT /projects/{projectId}): Update the project with the given id (projectId).
+*Object-related REST APIs.
+** getElements (GET /api/rest/projects/{projectId}/commits/{commitId}/elements): Get all the elements in a given project at the given commit.
+There are no commits in Sirius Web so you can use the same Id as the projectId for the commitId.
+** getElementById (GET /api/rest/projects/{projectId}/commits/{commitId}/elements/{elementId}): Get element with the given id (elementId) in the given project at the given commit.
+There are no commits in Sirius Web so you can use the same Id as the projectId for the commitId.
+** getRelationshipsByRelatedElement (GET /api/rest/projects/{projectId}/commits/{commitId}/elements/{elementId}/relationships): Get relationships that are incoming, outgoing, or both relative to the given related element.
+There are no commits in Sirius Web so you can use the same Id as the projectId for the commitId.
+** getRootElements (GET /api/rest/projects/{projectId}/commits/{commitId}/roots): Get all the root elements in the given project at the given commit.
+There are no commits in Sirius Web so you can use the same Id as the projectId for the commitId.
+
+== v2024.9.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/554[#554] [diagrams] Move _StateTransitionCompartmentNodeDescriptionProvider_ from syson-diagram-statetransition-view to module syson-diagram-common-view.
+- https://github.com/eclipse-syson/syson/issues/393[#393] [general-view] Code refactoring:
+* Rename `ExhibitStatesCompartmentItemNodeDescriptionProvider` to `StatesCompartmentItemNodeDescriptionProvider`.
+* _StatesCompartmentNodeDescriptionProvider_ now handles both exhibit and non-exhibit states.
+- https://github.com/eclipse-syson/syson/issues/564[#564] [metamodel] Align metamodel to SysMLv2 Beta 2 specification released on the 3rd of February 2024(see https://www.omg.org/spec/SysML/ for more details) and KerML Beta 2 specification released on the 17the of February 2024(see https://www.omg.org/spec/KerML/ for more details).
+You may have to fix your existing SysON models/projects by your own means to still be able to open them with SysON.
+Please download all your models/projects before upgrading to 2024.9.0.
+The changes are:
+* AnnotatingElement
+** add derived reference "ownedAnnotatingRelationship : Annotation"
+* Annotation
+** add derived reference "owningAnnotatingElement : AnnotatingElement"
+* Connector
+** remove attribute "isDirected : boolean"
+* OperatorExpression
+** remove derived reference "operand : Expression"
+* ParameterMembership
+** add operation "parameterDirection()  : FeatureDirectionKind"
+* Type
+** add operation "directionOfExcluding(Feature, Type[0..\*]) : FeatureDirectionKind"
+- https://github.com/eclipse-syson/syson/issues/568[#568] [interconnection-view] The following classes have been deleted, renamed, or merged to simplify the Interconnection View:
+* Deleted `InterconnectionViewForDefinitionDescriptionProvider`
+* Deleted `InterconnectionViewForDefinitionDiagramDescriptionProvider`
+* Deleted `InterconnectionViewForUsageDiagramDescriptionProvider`
+* Merged `RootUsageNodeDescriptionProvider` and `RootDefinitionNodeDescriptionProvider` into `RootNodeDescriptionProvider`
+* Renamed `FirstLevelChildPartUsageNodeDescriptionProvider` to `FirstLevelChildUsageNodeDescriptionProvider`
+* Renamed `ChildPartUsageNodeDescriptionProvider` to `ChildUsageNodeDescriptionProvider`
+- [releng] Switch to Sirius Web 2024.7.1: all diagrams must be deleted and created again, due to the fix of this Sirius Web https://github.com/eclipse-sirius/sirius-web/issues/1470[bug].
+- https://github.com/eclipse-syson/syson/issues/604[#604] [details] Add tool to create an _ExhibitState_ from a _StateUsage_.
+The following classes & methods have been deleted or modified to simplify the handling of _ExhibitStates_:
+* Deleted `StateTransitionToggleExhibitStateToolProvider`
+* Deleted `UtilService#canBeExhibitedStateUsage`
+* Deleted `UtilService#setUnsetAsExhibit`
+* Deleted `UtilService#isExhibitedStateUsage`
+* Deleted `UtilService#getAllReachableStatesWithoutReferencialExhibitExpression`
+* Deleted `ViewNodeService#isHiddenByDefaultExhibitStates`
+* Deleted `ViewNodeService#isHiddenByDefaultNonExhibitStates`
+* Add new `IViewDiagramElementFinder` parameter to `StateTransitionViewNodeToolSectionSwitch`
+- https://github.com/eclipse-syson/syson/issues/634[#634] [diagrams] Allow to select existing Type on Subject tool.
+The following methods have been deleted or modified:
+* Deleted `ViewCreateService#createPartUsageAsSubject`
+* Add new `EClass`, 'EReference' and `IDescriptionNameGenerator` parameters to `SubjectCompartmentNodeToolProvider`
+- [core] Migrate frontend to MUI 5, if you contributed React components that use MUI, you should upgrade them to use MUI 5.
+- https://github.com/eclipse-syson/syson/issues/674[#674] [diagrams] Ensure that dropped nodes are always collapsed.
+Moved `ToolService#dropElementFromExplorer` and `ToolService#dropElementFromDiagram` into `ViewToolService`.
+* The method `dropElementFromExplorer` now requires view-related imports that motivated this refactoring.
+* The method `dropElementFromDiagram` has been moved for the sake of consistency.
+- https://github.com/eclipse-syson/syson/issues/552[#552] [diagrams] Fix _Add Existing Elements_ tool for start and done actions. 
+The following methods have been moved to `UtilService` to make them reusable by different services (they are now used by `ViewNodeService` and `ViewToolService`):
+* `ViewNodeService#getAllStandardStartActions`
+* `ViewNodeService#getAllStandardDoneActions`
+* `ViewNodeService#isAction`
+* `ViewNodeService#isPart`
+- https://github.com/eclipse-syson/syson/issues/552[#552] [diagrams] Rename `ViewLabelService#getInitialDirectEditLabel` service into `getInitialDirectEditListItemLabel` to specify the computation of the initial label on list item elements.
+- https://github.com/eclipse-syson/syson/issues/715[#715] [services] Fix the drop of an element on itself.
+`EMFUtils#isAncestor(parent, eObject)` now returns `true` if `parent == eObject`.
+- https://github.com/eclipse-syson/syson/issues/718[#718] [action-flow-view] It is not possible to create a Package in an Action Flow View diagram anymore.
+
+=== Dependency update
+
+- [releng] Switch to Sirius Web 2024.9.0
+- [releng] Migrate frontend to MUI 5
+- [releng] Switch to `maven-checkstyle-plugin` 3.4.0
+- [releng] Switch to Spring Boot 3.3.1
+- [releng] Add a dependency to `CycloneDX` to compute the backend software bill of materials during the build
+- [releng] Add a dependency to `pathfinding`
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/606[#606] [interconnection-view] Prevent nested part to be rendered as border nodes
+- https://github.com/eclipse-syson/syson/issues/619[#619] [diagrams] Fix an issue where a click on inherited members inside compartments was raising an error instead of displaying the palette.
+- https://github.com/eclipse-syson/syson/issues/621[#621] [syson] Fix non-containment reference issue on standard library copy.
+These references were still pointing to elements in the standard library resources, while they should point to elements in the copied resources.
+- https://github.com/eclipse-syson/syson/issues/651[#651] [metamodel] Remove owning Usage memberships from inherited memberships of Usages.
+- https://github.com/eclipse-syson/syson/issues/654[#654] [services] Prevent the drop of an element (from the explorer or from the diagram) on one of its children.
+- https://github.com/eclipse-syson/syson/issues/658[#658] [services] Fix direct edit for Requirement and Constraint
+- https://github.com/eclipse-syson/syson/issues/552[#552] [diagrams] Fix _Add Existing Elements_ tool for start and done actions. 
+- https://github.com/eclipse-syson/syson/issues/685[#685] [services] Fix name resolution in constraint expressions.
+It is now possible to reference an element in any of the containing namespaces of the constraint.
+- https://github.com/eclipse-syson/syson/issues/687[#687] [services] Fix the drop of an action from the diagram to an action flow compartment.
+- https://github.com/eclipse-syson/syson/issues/703[#703] [services] Fix an issue where it was impossible anymore to set the cardinality of an `Element` as graphical node through direct edit.
+- https://github.com/eclipse-syson/syson/issues/705[#705] [services] Fix ConjugatedPortDefinition label.
+- https://github.com/eclipse-syson/syson/issues/704[#704] [interconnection-view] Fix name direct edit for Interconnection View nodes.
+- https://github.com/eclipse-syson/syson/issues/715[#715] [services] Fix the drop of an element on itself.
+The drop doesn't reveal the _documentation_ compartment anymore, and a warning message is displayed to indicate that the drop is not possible.
+- https://github.com/eclipse-syson/syson/issues/711[#711] [diagrams] Prevent feature typing from disappearing when nesting a PartUsage in a PartDefinition.
+* The tool _Add Part as nested Part_ now correctly keeps the existing relationships of the PartUsage after its owner is changed.
+- https://github.com/eclipse-syson/syson/issues/722[#722] [diagrams] Allow the drop of the root element of a diagram on its background.
+- https://github.com/eclipse-syson/syson/issues/726[#726] [import] Add support for isReference attribute in SysML parser.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/538[#538] [general-view] Add actions in _PartUsage_ and _PartDefinition_
+- https://github.com/eclipse-syson/syson/issues/554[#554] [general-view] Add states in _PartUsage_ and _PartDefinition_
+- https://github.com/eclipse-syson/syson/issues/393[#393] [general-view] Add _ExhibitStates_ on General View diagram
+- https://github.com/eclipse-syson/syson/issues/557[#557] [state-transition-view] Allow the creation of a StateTransitionView diagram on a _PartUsage_/_PartDefinition_
+- https://github.com/eclipse-syson/syson/issues/558[#558] [state-transition-view] Allow the creation of a StateTransitionView diagram on a _StateUsage_/_StateDefinition_
+- https://github.com/eclipse-syson/syson/issues/568[#568] [interconnection-view] Simplify Interconnection View implementation and remove duplicated code
+- https://github.com/eclipse-syson/syson/issues/571[#571] [interconnection-view] Add ActionUsage node in Interconnection View
+- https://github.com/eclipse-syson/syson/issues/581[#581] [interconnection-view] Add documentation and action flow compartment in ActionUsage
+- https://github.com/eclipse-syson/syson/issues/590[#590] [diagrams] Add label support for referential Usages
+- https://github.com/eclipse-syson/syson/issues/599[#599] [diagrams] Add support for ref keyword in direct edit
+- https://github.com/eclipse-syson/syson/issues/602[#602] [diagrams] Use empty diamond source style for nested reference usage edge
+- https://github.com/eclipse-syson/syson/issues/604[#604] [diagrams] Modify the creation of an _ExhibitState_ from a _StateUsage_ or _StateDefinition_.
+There is now several tools for creating an _ExhibitState_.
+The first one called "New ExhibitState" creates a simple _ExhibitState_.
+The second one called "New ExhibitState with referenced State" shows a dialog allowing to select an existing _State_ to associate to the new _ExhibitState_. 
+- https://github.com/eclipse-syson/syson/issues/617[#617] [diagrams] Display qualified names in diagrams nodes' labels in case of standard libraries elements.
+- https://github.com/eclipse-syson/syson/issues/624[#624] [diagrams] Allow to select existing _Action_ on Perform tool.
+- https://github.com/eclipse-syson/syson/issues/628[#628] [diagrams] Allow to set measurement units via direct edit.
+- https://github.com/eclipse-syson/syson/issues/634[#634] [diagrams] Allow to select existing _Type_ on Subject tool.
+- https://github.com/eclipse-syson/syson/issues/639[#639] [diagrams] Handle properties keywords in label of Usage element.
+- https://github.com/eclipse-syson/syson/issues/639[#639] [diagrams] Allow direct edit of properties of Usage elements.
+The supported properties are `in`, `out`, `inout`, `abstract`, `variation`, `readonly`, `derived`, `end`, `ordered`, and `nonunique`.
+- https://github.com/eclipse-syson/syson/issues/641[#641] [general-view] Add support for expressions in constraints.
+- https://github.com/eclipse-syson/syson/issues/644[#644] [general-view] Add _actors_ compartment in UseCase and Requirement.
+- https://github.com/eclipse-syson/syson/issues/646[#646] [general-view] Handle the representation of actors on the General View diagram.
+- https://github.com/eclipse-syson/syson/issues/648[#648] [general-view] Add support for edges between actors and their containing UseCase/Requirement.
+The source of the edge (the UseCase or Requirement) can be reconnected to another UseCase or Requirement, but the target (Actor) cannot be reconnected.
+- https://github.com/eclipse-syson/syson/issues/656[#656] [services] Improve the drag and drop of containers elements to move their content
+- https://github.com/eclipse-syson/syson/issues/660[#660] [general-view] Allow to select existing _RequirementUsage_ and _RequirementDefinition_ on Objective tool. 
+- https://github.com/eclipse-syson/syson/issues/662[#662] [tests] Make the build fail when a Cypress test contains it.only.
+- https://github.com/eclipse-syson/syson/issues/665[#665] [services] Support public import in direct edit specializations.
+It is now possible to specialize an element with a qualified name containing namespaces importing the required features.
+For example, `myAttribute : ISQ::MassValue` now correctly types the attribute with `ISQBase::MassValue`.
+- https://github.com/eclipse-syson/syson/issues/671[#671] [syson] Improve the support of root `Namespaces`.
+  * Root `Namespaces` are now implicitly created at the root of SysON documents.
+  * Creating an element at the root of a SysON document now creates it in its root `Namespace`.
+  * A new filter is available to hide root `Namespaces` and is enabled by default.
+  * It is no longer possible to create `Namespace` from the explorer.
+  * It is no longer possible to create a representation on a root `Namespace`.
+- https://github.com/eclipse-syson/syson/issues/674[#674] [diagrams] Ensure that dropped nodes are always collapsed.
+- https://github.com/eclipse-syson/syson/issues/669[#669] [diagrams] Handle properties keywords in labels of `Definitions` and `Usages` graphical nodes.
+- https://github.com/eclipse-syson/syson/issues/678[#678] [diagrams] Ensure that dropping an element reveals the corresponding node if it exists.
+  * Dropping an element from the explorer on the diagram reveals the corresponding node if it is already on the diagram and hidden.
+  * A warning message is now displayed when attempting to drop an element which is already displayed and visible in the target container.
+- https://github.com/eclipse-syson/syson/issues/670[#670] [diagrams] Ignore keywords order during direct edit of prefixes label of `Definitions` and `Usages` graphical elements.
+- https://github.com/eclipse-syson/syson/issues/689[#689] [diagrams] Ensure coherence between Direct Edit capabilities and the displayed label
+- https://github.com/eclipse-syson/syson/issues/709[#709] [diagrams] Allow to drop a Definition from the explorer on an Usage on a diagram or in a list compartment to type it.
+- https://github.com/eclipse-syson/syson/issues/718[#718] [action-flow-view] Allow to create an Action Flow View diagram on ActionDefinition or ActionUsage.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/553[#553] [diagrams] Add "Show/Hide Icons in Diagrams" action in Diagram Panel, allowing to show/hide icons in diagrams (icons are not part of the SysMLv2 specification).
+- https://github.com/eclipse-syson/syson/issues/585[#585] [diagrams] Add new tools allowing to create an _ExhibitState_ at the root of General View and StateTransition View.
+The first one called "New ExhibitState" creates a simple _ExhibitState_.
+The second one called "New ExhibitState with referenced State" shows a dialog allowing to select an existing _State_ to associate to the new _ExhibitState_.
+The selected _State_ will be added to the diagram, not the new _ExhibitState_.
+- https://github.com/eclipse-syson/syson/issues/587[#587] [interconnection-view] Handle _FlowConnectionUsage_ between _PortUsages_ in Interconnection View.
+A new edge tool allows to create a flow between two ports.
+- https://github.com/eclipse-syson/syson/issues/598[#598] [diagrams] Add tools to set a Feature as composite or reference.
+- https://github.com/eclipse-syson/syson/issues/596[#596] [interconnection-view] Handle _ItemUsage_ in Interconnection View and _FlowConnectionUsage_ involving items
+- https://github.com/eclipse-syson/syson/issues/615[#615] [details] Add documentation property to Core tab of the Details view.
+- https://github.com/eclipse-syson/syson/issues/626[#626] [explorer] Allow to insert textual SysMLv2 from existing model elements.
+- https://github.com/eclipse-syson/syson/issues/466[#466] [syson] Handle implicit specializations from standard libraries for Usages/Definitions.
+- https://github.com/eclipse-syson/syson/issues/667[#667] [diagrams] Add "Show/Hide Inherited Members in Diagrams" action in Diagram Panel, allowing to show/hide inherited members from users models in diagrams.
+- https://github.com/eclipse-syson/syson/issues/680[#680] [diagrams] Add "Show/Hide Inherited Members from Standard Libraries in Diagrams" action in Diagram Panel, allowing to show/hide inherited members from standard libraries in diagrams.
+
+== v2024.7.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/298[#298] [syson] Add standard libraries and new models now have a root Namespace to conform with KerML/SysML specifications.
+- https://github.com/eclipse-syson/syson/issues/334[#334] [diagrams] Generalization of StateTransition descriptions.
+  * Rename `AbstractDiagramDescriptionProvider` `nameGenerator` as `descriptionNameGenerator`. Impacted concrete implementations: `ActionFlowViewDiagramDescriptionProvider`, `GeneralViewDiagramDescriptionProvider`,  `InterconnectionViewForDefinitionDiagramDescriptionProvider`, `InterconnectionViewForUsageDiagramDescriptionProvider`, `StateTransitionViewDiagramDescriptionProvider`.
+  * Rename `syson-diagram-statetransition-view` `CompartmentNodeDescriptionProvider` as `StateTransitionActionsCompartmentNodeDescriptionProvider`.
+  * `StateTransitionViewEdgeService` removed, services moved to `ViewEdgeService` and `ViewLabelService`.
+  * `StateTransitionActionToolProvider` moved to `syson-diagram-common-view`
+  * `StateTransitionCompartmentNodeToolProvider` moved to `syson-diagram-common-view`
+  * `createState` and `createOwnedAction` services moved to `ViewToolService`
+- https://github.com/eclipse-syson/syson/issues/349[#349] [syson] Switch to sirius-web domain driven design architecture.
+Please download your existing SysON projects before moving to this new version.
+A reset of the database is needed.
+- https://github.com/eclipse-syson/syson/issues/393[#393] [diagrams] Code refactoring:
+  * Move `AbstractDiagramDescriptionProvider#createNodeToolFromDiagramBackground(NodeDescription, EClassifier)` to new `ToolDescriptionService`
+  * Move `AbstractViewElementDescriptionProvider#addExistingElementsTool(boolean)` to new `ToolDescriptionService`
+  * Remove `AbstractViewElementDescriptionProvider`
+  * Move `createDropFromExplorerTool` to new `ToolDescriptionService`
+  * Move and rename `AbstractDiagramDescriptionProvider.addElementsToolSection(IViewDiagramElementFinder)` to `ToolDescriptionService#addElementsDiagramToolSection()`
+  * Move and rename `AbstractNodeDescriptionProvider#addExistingElementsTool()` to `ToolDescriptionService#addElementsNodeToolSection()`
+  * Remove `AbstractDiagramDescriptionProvider`
+  * Rename `StateTransitionActionToolProvider` to `StateTransitionActionCompartmentToolProvider`
+  * Move `AbstractViewNodeToolSectionSwitch#buildCreateSection(NodeTool...)` to `ToolDescriptionService#buildCreateSection(NodeTool...)`
+  * Merge `AbstractViewNodeToolSectionSwitch#addElementsToolSection()` and `AbstractViewNodeToolSectionSwitch#addExistingNestedElementsTool()` in `ToolDescriptionService#addElementsNodeToolSection(boolean)`
+- https://github.com/eclipse-syson/syson/issues/423[#423] [diagrams] `ViewLabelService#getCompartmentItemUsageLabel` has been renamed to `ViewLabelService#getCompartmentItemLabel`.
+- https://github.com/eclipse-syson/syson/issues/423[#423] [diagrams] `ViewLabelService#getUsageInitialDirectEditLabel` has been renamed to `ViewLabelService#getInitialDirectEditLabel`.
+- https://github.com/eclipse-syson/syson/issues/492[#492] [diagrams] Code refactoring:
+* `AbstractViewNodeToolSectionSwitch#createNestedUsageNodeTool` has been deleted. Please use `ToolDescriptionService#createNodeTool` instead
+* `AbstractCompartmentNodeDescriptionProvider#getItemCreationToolProvider` has been renamed to `getItemCreationToolProviders` and now returns a list of `INodeToolProvider`.
+
+=== Dependency update
+
+- [tests] Add test dependency to Cypress 12.11.0 (only required to execute integration tests)
+- [releng] Switch to EMF Json 2.3.12
+- [releng] Switch to Spring Boot 3.2.5
+- [releng] Switch to `@apollo/client` 3.10.4
+- [releng] Switch to `graphql` 16.8.1
+- [releng] Switch to `vite` 5.2.11, `vitest` 1.6.0, `@vitest/coverage-v8` 1.6.0 and `@vitejs/plugin-react` 4.3.0
+- [releng] Switch to `typescript` 5.4.5
+- [releng] Switch to `turbo` 1.13.3
+- [releng] Switch to `jacoco` 0.8.12
+- [releng] Switch to `maven-checkstyle-plugin` 3.3.1
+- [releng] Remove the dependency to `reflect-metadata`
+- [releng] Switch to `subscriptions-transport-ws` 0.11.0
+- [releng] Switch to @ObeoNetwork/gantt-task-react 0.4.19
+- [releng] Switch to Sirius Web 2024.7.0
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/298[#298] [metamodel] Fix metamodel to manage root namespaces.
+- https://github.com/eclipse-syson/syson/issues/329[#329] [services] Ignore root namespace with no name during qualified name resolution
+- https://github.com/eclipse-syson/syson/issues/337[#337] [diagrams] Fix direct edit of single digit cardinalities.
+- https://github.com/eclipse-syson/syson/issues/348[#348] [diagrams] The semantic representation of the Succession edge is not correct.
+- https://github.com/eclipse-syson/syson/issues/356[#356] [action-flow-view] The Allocate edge is not displayed in the Action Flow View diagram.
+- https://github.com/eclipse-syson/syson/issues/403[#403] [diagrams] Wrong computation of the Succession owner
+- https://github.com/eclipse-syson/syson/issues/407[#407] [diagrams] Fix the owner membership of dropped elements
+- https://github.com/eclipse-syson/syson/issues/376[#376] [export] Fix names used during export of FeatureValue
+- https://github.com/eclipse-syson/syson/issues/373[#373] [export] Fix names used during export of MetadataDefinition
+- https://github.com/eclipse-syson/syson/issues/364[#364] [export] Fix names used during export of FeatureChainExpression
+- https://github.com/eclipse-syson/syson/issues/363[#363] [export] Fix the first part of the InvocationExpression during export
+- https://github.com/eclipse-syson/syson/issues/341[#341] [export] Fix missing element names in the expressions during export
+- https://github.com/eclipse-syson/syson/issues/459[#459] [import] Fix documentation import to remove /* */ around texts
+- https://github.com/eclipse-syson/syson/issues/490[#490] [diagrams] Fix an issue where the _Adjust size_ tool had no effect on Packages nodes.
+- https://github.com/eclipse-syson/syson/issues/502[#502] [export] Fix an issue where the simple quotes were not escaped when exporting as textual files.
+- https://github.com/eclipse-syson/syson/issues/511[#511] [export] Fix an issue where models were exported with a global indentation instead of no indentation. 
+- https://github.com/eclipse-syson/syson/issues/501[#501] [diagrams] Fix an issue where the double quotes were set along with the string value in case of a direct edit of the value part.
+- https://github.com/eclipse-syson/syson/issues/509[#509] [general-view] Add missing doc compartment in UseCase, UseCaseDefinition, and AllocationDefinition
+- https://github.com/eclipse-syson/syson/issues/505[#505] [diagrams] Add value expression in Node label
+- https://github.com/eclipse-syson/syson/issues/506[#506] [diagrams] Fix partial direct edit issues when deleting information
+- https://github.com/eclipse-syson/syson/issues/540[#540] [syson] Allow the creation of sub-Packages in the model explorer
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/298[#298] [syson] Add root Namespace to SysON models and libraries
+- https://github.com/eclipse-syson/syson/issues/324[#324] [diagrams] Improve support for whitespace, quotes, and special characters in direct edit
+- https://github.com/eclipse-syson/syson/issues/307[#307] [diagrams] Fix parallel states tooling conditions
+- https://github.com/eclipse-syson/syson/issues/269[#269] [diagrams] Handle start and done actions in Action Flow View & General View diagrams
+- https://github.com/eclipse-syson/syson/issues/344[#344] [metamodel] Improve implementation of getName and getShortName
+- https://github.com/eclipse-syson/syson/issues/333[#333] [state-transition-view] Improve actions compartment for states
+- https://github.com/eclipse-syson/syson/issues/334[#334] [diagrams] Add State Transition View concepts in the General View diagram
+- https://github.com/eclipse-syson/syson/issues/388[#388] [details] Add Transition source and target to Core properties in the Details view
+- https://github.com/eclipse-syson/syson/issues/394[#394] [metamodel] All _redefines_ references have been implemented.
+- https://github.com/eclipse-syson/syson/issues/416[#416] [import] Improve textual import running process.
+By default, end users don't have to copy _syside-cli.js_ near the _syson-application_ jar anymore.
+The embedded _syside-cli.js_ is copied in a system temp folder and executed from there (with node).
+But, if you encounter execution rights problem, you can still copy _syside-cli.js_ in a place where you have the appropriate rights and use the _org.eclipse.syson.syside.path_ application option.
+- https://github.com/eclipse-syson/syson/issues/433[#433] [tests] Add scripts to setup and udpate the integration testing environment
+- https://github.com/eclipse-syson/syson/issues/445[#445] [diagrams] Improve the way node descriptions are retrieved for a given semantic element
+- https://github.com/eclipse-syson/syson/issues/439[#439] [diagrams] Handle Perform action concept in diagrams
+- https://github.com/eclipse-syson/syson/issues/460[#460] [details] Extra property "Typed by" is now always visible in the details view for _Feature_ elements, even if the _Feature_ doesn't have a type yet.
+- https://github.com/eclipse-syson/syson/issues/468[#468] [diagrams] Rename creation tools for Start and Done actions
+- https://github.com/eclipse-syson/syson/issues/470[#470] [diagrams] Reduce the default height of the Package node in diagrams 
+- https://github.com/eclipse-syson/syson/issues/472[#472] [properties] Move Feature#direction in Core tab of the Details view
+- https://github.com/eclipse-syson/syson/issues/475[#475] [explorer] Sort New Object menu entries
+- https://github.com/eclipse-syson/syson/issues/477[#477] [diagrams] Add Direct Edit tool in control nodes palette
+- https://github.com/eclipse-syson/syson/issues/479[#479] [diagrams] Allow multiple occurrences of Start and Done actions in action body
+- https://github.com/eclipse-syson/syson/issues/320[#320] [import] Implement new import strategy based on ecore
+- https://github.com/eclipse-syson/syson/issues/486[#486] [diagrams] Improve the _addExistingElement_ tool.
+The tool now works correctly on packages, and doesn't render sibling elements when their semantic element has been rendered by another node (e.g. in a compartment).
+- https://github.com/eclipse-syson/syson/issues/483[#483] [diagrams] The empty/null values for subsetting/redefinition/subclassification/featureTyping are not displayed anymore in diagram node labels.
+- https://github.com/eclipse-syson/syson/issues/482[#482] [diagrams] Add tools for creating Ports with direction
+- https://github.com/eclipse-syson/syson/issues/492[#492] [diagrams] Add tools for creation Items with direction
+- https://github.com/eclipse-syson/syson/issues/494[#494] [diagrams] Change the default name of the transition element
+- [syson] Provide new icons for State, Conjugation, Port (in,in/out,out) and Item (in,in/out,out).
+- https://github.com/eclipse-syson/syson/issues/507[#507] [general-view] Add tools to create Items and Parts in Port and PortDefinition
+- https://github.com/eclipse-syson/syson/issues/508[#508] [general-view] Add tool to create Requirements in RequirementDefinition
+- https://github.com/eclipse-syson/syson/issues/519[#519] [diagrams] Add tools for creating _Items_ on _ActionDefinition_ in GeneralView and ActionFlowView.
+- https://github.com/eclipse-syson/syson/issues/504[#504] [syson] Add private and protected visibility decorators on all elements
+- https://github.com/eclipse-syson/syson/issues/542[#542] [tests] Enable Action's sub-node creation tests for free form items
+These tests were de-activated because of an issue in https://github.com/eclipse-syson/syson/issues/542[Sirius Web].
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/315[#315] [tests] Add Cypress test infrastructure and execute the Cypress tests as part of pull request checks
+- https://github.com/eclipse-syson/syson/issues/358[#358] [diagrams] Handle the JoinNode concept in actions body of diagrams
+- https://github.com/eclipse-syson/syson/issues/359[#359] [tests] Add tests to enforce a set of conventions on SysON DiagramDescriptions
+- https://github.com/eclipse-syson/syson/issues/371[#371] [diagrams] Handle the ForkNode concept in actions body of diagrams
+- https://github.com/eclipse-syson/syson/issues/381[#381] [diagrams] Handle the MergeNode concept in actions body of diagrams
+- https://github.com/eclipse-syson/syson/issues/389[#389] [diagrams] Handle the DecisionNode concept in actions body of diagrams
+- https://github.com/eclipse-syson/syson/issues/391[#391] [diagrams] AcceptAction is now available inside an Action body
+- https://github.com/eclipse-syson/syson/issues/393[#393] [diagrams] Handle the ExhibitState concept in diagrams
+- https://github.com/eclipse-syson/syson/issues/423[#423] [diagrams] Add new documentation compartment on all existing nodes in all diagrams.
+- https://github.com/eclipse-syson/syson/issues/420[#420] [diagrams] Handle AssignmentAction concept in actions body in diagrams
+- https://github.com/eclipse-syson/syson/issues/405[#405] [tests] Add integration test infrastructure
+- [doc] Initial contribution of the documentation
+
+== v2024.5.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/149[#149] [requirement-view] The `requirement-view` diagram has been introduced by error in the last release. This diagram is not defined in the SysMLv2 specification. It has been deleted in this release.
+
+=== Dependency update
+
+- Switch to Sirius Web 2024.5.0
+- Switch to @ObeoNetwork/gantt-task-react 0.4.9
+- Add dependency to org.apache.commons.commons-text 1.10.0
+
+=== Bug fixes
+
+- https://github.com/eclipse-syson/syson/issues/144[#144] [diagrams] Fix an issue where the "Add existing elements (recursive)" failed on PartUsage.
+- https://github.com/eclipse-syson/syson/issues/167[#167] [interconnection-view] Add attributes compartment in children PartUsage nodes.
+- https://github.com/eclipse-syson/syson/issues/174[#174] [details] Fix an issue where an error raised when setting a valid new value (with primitive type) in the Details view.
+- https://github.com/eclipse-syson/syson/issues/192[#192] [import] Fix an issue where the /* and */ of a Comment's body were imported while importing a textual SysML file.
+- https://github.com/eclipse-syson/syson/issues/188[#188] [import] Fix an issue where some Memberships were contained in their parent through `ownedRelatedElement` instead of `ownedRelationship` reference.
+- https://github.com/eclipse-syson/syson/issues/184[#184] [import] Fix an issue from element imported threw an alias
+- https://github.com/eclipse-syson/syson/issues/249[#249] [import] Fix an issue to avoid Infinite Loop
+- https://github.com/eclipse-syson/syson/issues/199[#199] [explorer] Fix an issue where the rename action was not renaming tree items anymore
+- https://github.com/eclipse-syson/syson/issues/209[#209] [diagrams] EnumerationDefinition was created without any name
+- https://github.com/eclipse-syson/syson/issues/237[#237] [diagrams] Fix an issue where `Add existing element (recursive)` creates child nodes for nested and owned usages at the root of the diagram instead of in their parent node
+- https://github.com/eclipse-syson/syson/issues/262[#262] [import] Fix an issue where an exception was raised while importing standard examples
+- https://github.com/eclipse-syson/syson/issues/264[#264] [diagrams] Restore hide capabilities that were missing after the latest Sirius Web update
+- https://github.com/eclipse-syson/syson/issues/274[#274] [import] Namespace.getImportedMemberships method now prevents name collisions
+- https://github.com/eclipse-syson/syson/issues/271[#271] [diagrams] Remove non end Usages from AllocationDefinition ends compartment
+- https://github.com/eclipse-syson/syson/issues/229[#229] [diagrams] Prevent circular containment of nested parts including self containment
+- https://github.com/eclipse-syson/syson/issues/305[#305] [diagrams] Fix performance issue when using EcoreUtil.delete
+- https://github.com/eclipse-syson/syson/issues/272[#272] [statetransition-view] Add "state transition" compartment and fix the graphical creation of actions in StateDefinition and StateUsage
+- https://github.com/eclipse-syson/syson/issues/294[#294] [diagrams] Fix an issue where inherited features in compartments of a graphical element could display themselves
+- https://github.com/eclipse-syson/syson/issues/236[#236] [diagrams] Fix an issue where `Add existing element (recursive)` could fail.
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/153[#153] [syson] Forbid composite usages inside PortDefinition/PortUsage.
+- https://github.com/eclipse-syson/syson/issues/155[#155] [syson] Forbid composite usages inside AttributeDefinition/AttributeUsage.
+- https://github.com/eclipse-syson/syson/issues/160[#160] [syson] Add explicit usage of node to call syside javascript file.
+- https://github.com/eclipse-syson/syson/issues/172[#172] [details] Add Membership#visibility attribute to Core properties in the Details view.
+- https://github.com/eclipse-syson/syson/issues/171[#171] [details] Add PortUsage#direction attribute to Core properties in the Details view.
+- https://github.com/eclipse-syson/syson/issues/169[#169] [general-view] Handle UseCaseDefinition and UseCaseUsage in General View diagram
+- https://github.com/eclipse-syson/syson/issues/182[#182] [diagrams] Make Definition/Usage node collapsed by default in general-view & actionflow-view diagrams
+- https://github.com/eclipse-syson/syson/issues/183[#183] [diagrams] Expand Definition/Usage nodes in all diagrams when a compartment item is created
+- [syson] Add icons for all elements
+- https://github.com/eclipse-syson/syson/issues/204[#204] [interconnection-view] Change label position (from inside to outside) for ports (Border Nodes)
+- https://github.com/eclipse-syson/syson/issues/202[#202] [general-view] Allow to create general-view diagrams on any Namespace element
+- https://github.com/eclipse-syson/syson/issues/268[#268] [diagrams] Reveal only the appropriate compartment when creating child element
+- https://github.com/eclipse-syson/syson/issues/278[#278] [interconnection-view] Allow to create interconnection-view diagrams on any Usage/Definition element
+- https://github.com/eclipse-syson/syson/issues/277[#277] [diagrams] Add a free-form compartment in Action elements for owned actions
+- https://github.com/eclipse-syson/syson/issues/308[#308] [statetransition-view] Add "Add existing elements" tools on State & StateDefinition graphical elements.
+- https://github.com/eclipse-syson/syson/issues/254[#254] [diagrams] Add delete from model tool on containment edges
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/147[#147] [general-view] Refactor compartments of `RequirementDefinition` and `RequirementUsage` to better fit the specification and examples.
+- https://github.com/eclipse-syson/syson/issues/151[#151] [diagrams] Add "Become nested" edge tools for AttributeUsage, ItemUsage, PartUsage and PortUsage.
+- https://github.com/eclipse-syson/syson/issues/154[#154] [diagrams] Add creation node tools inside existing usage elements.
+- https://github.com/eclipse-syson/syson/issues/163[#163] [diagrams] Add composite edges between usage and compartment content
+- https://github.com/eclipse-syson/syson/issues/165[#165] [general-view] Handle OccurrenceDefinition and OccurrenceUsage in General View diagram
+- https://github.com/eclipse-syson/syson/issues/177[#177] [diagrams] Add reconnect tools for composition edges
+- https://github.com/eclipse-syson/syson/issues/180[#180] [diagrams] Handle Allocation definition and Allocation usage
+- https://github.com/eclipse-syson/syson/issues/196[#196] [export] SysML standard serialization format
+- https://github.com/eclipse-syson/syson/issues/219[#219] [diagrams] Handle ConjugatedPortDefinition in diagrams, Explorer and Details View.
+- https://github.com/eclipse-syson/syson/issues/234[#234] [interconnection-view] Handle InterfaceUsages edges between PortUsages in InterconnectionView.
+- https://github.com/eclipse-syson/syson/issues/175[#175] [diagrams] Add the State Transition view diagram
+- https://github.com/eclipse-syson/syson/issues/242[#242] [diagrams] Handle Inherited features in features compartments.
+- https://github.com/eclipse-syson/syson/issues/217[#217] [diagrams] Handle Accept Action Usage
+- https://github.com/eclipse-syson/syson/issues/285[#285] [interconnection-view] Add rotative images for PortUsage in Interconnection View
+- https://github.com/eclipse-syson/syson/issues/297[#297] [diagrams] Handle Succession as edge between Actions inside action flow compartment
+
+== v2024.3.0
+
+=== Breaking changes
+
+- Refactor Node Descriptions Providers in General View: all Definitions and Usages Node Descriptions Providers (e.g. `PartDefinitionNodeDescriptionProvider` or `ItemUsageNodeDescriptionProvider`) have been replaced by two new Node Descriptions Providers: `DefinitionNodeDescriptionProvider` and `UsageNodeDescriptionProvider`.
+- Switch to Sirius Web 2024.3.0: `GeneralViewRegistryConfigurer` has been renamed to `GeneralViewDescriptionProvider` as it now implements `IEditingContextRepresentationDescriptionProvider` instead of `IRepresentationDescriptionRegistryConfigurer`. Same for `InterconnectionViewRegistryConfigurer`.
+`SysMLv2ObjectService` has been renamed into `SysMLv2LabelService` as it now implements `ILabelServiceDelegate` instead of `IObjectServiceDelegate`.
+- https://github.com/eclipse-syson/syson/issues/93[#93] [diagrams] Refactor diagrams code with creation of the diagram-common-view module to gather all cross diagram tools:
+  * `DescriptionNameGenerator` is no longer a static class with static methods.
+  There should be one name generator per diagram owning the diagram prefix used to prefix all descriptions for this diagram (for instance `GVDescriptionNameGenerator`)
+
+=== Dependency update
+
+- https://github.com/eclipse-syson/syson/issues/71[#71] [releng] Add `commons-io 2.11.0` dependency explicitly in `syson-application-configuration`.
+- Switch to Sirius Web 2024.3.0
+
+=== Bug fixes
+- https://github.com/eclipse-syson/syson/issues/118[#118] Subclassification edge has been broken during this release
+
+=== Improvements
+
+- https://github.com/eclipse-syson/syson/issues/75[#75] [services] Improve direct edit.
+The direct edit of labels in diagrams now handles partial edition.
+The partial edit allows to:
+** "newName" -> set a new name to the element
+** "newName :" -> set a new name and delete typing
+** "newName :>" -> set a new name and delete subsetting/- subclassification
+** "newName :>>" -> set a new name and delete redefinition
+** "newName =" -> set a new name and delete feature value
+** "newName []" -> set a new name and delete the multiplicity range
+** ": newType" -> set a new type
+** ":> newType" -> set a new subsetting/subclassification
+** ":>> newType" -> set a new redefinition
+** "= newValue" -> set a new value
+** "[newRange]" -> set a new range
+- https://github.com/eclipse-syson/syson/issues/78[#78] [explorer] Review new objects candidates in Explorer view context menu.
+Only provides candidates that will make sense.
+Also allow the creation of elements with their containing Membership in one click.
+- https://github.com/eclipse-syson/syson/issues/80[#80] [diagrams] Add recursive version of the "Add existing elements" tool.
+- https://github.com/eclipse-syson/syson/issues/86[#86] [general-view] Improves Package headers' width to better handle longer labels and prevents Package children from overlapping the Package body's west border.
+- https://github.com/eclipse-syson/syson/issues/52[#52] [syson] Add all KerML and SysML standard libraries.
+- https://github.com/eclipse-syson/syson/issues/88[#88] [diagrams] Improves creation tool names by adding spaces between type words and removing "Usage" from tool names.
+- https://github.com/eclipse-syson/syson/issues/91[#91] [general-view] Add NodeTools to create compartment elements from the compartment's parent node. For example, it is now possible to create an `AttributeUsage` in the `PartDefinition` palette.
+- https://github.com/eclipse-syson/syson/issues/93[#93] [diagrams] Reorganize General View diagram palette with several tool sections.
+- https://github.com/eclipse-syson/syson/issues/105[#105] [details] In the Details view, display the standard libraries in Reference Widget's model browser dialog.
+Also remove the standard libraries elements in Reference Widget's candidates (when you click in the background part of the widget) for now as it leads to performance issues.
+They will be only accessible through the model browser dialog.
+- https://github.com/eclipse-syson/syson/issues/112[#112] [services] Improves `getAllReachable()` util service, allowing to reduce the time being spent to retrieve the elements of a given type.
+- https://github.com/eclipse-syson/syson/issues/134[#134] [diagrams] Add FeatureTyping Edge tool, in the same way as other existing links such as Subclassification, Redefinition...
+- https://github.com/eclipse-syson/syson/issues/137[#137] [details] Add kind property from RequirementConstraintMembership on Constraint core properties.
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/97[#97] [explorer] Add a filter allowing to hide membership elements in the Explorer view.
+- https://github.com/eclipse-syson/syson/issues/98[#98] [explorer] Add filters allowing to hide KerML/SysML libraries in the Explorer view.
+- https://github.com/eclipse-syson/syson/issues/93[#93] [diagrams] Add the following new diagrams:
+  * Action Flow view
+  * Requirement view
+- https://github.com/eclipse-syson/syson/issues/140[#140] [import] It is now possible to import SysMLv2 textual files into SysON, through the existing document upload modal.
+
+== v2024.1.0
+
+=== Breaking changes
+
+- https://github.com/eclipse-syson/syson/issues/52[#52] [services] All `findUsageByName` and `findDefinitionByName` method have been replaced by the new `findByNameAndType` in `org.eclipse.syson.services.UtilService`.
+- Delete useless fork of `UploadDocumentEventHandler` & `DocumentController` from Sirius Web.
+
+=== Dependency update
+
+- Switch to Sirius Web 2024.1.1 (Please do not use new Portal representation introduced by this release of Sirius Web, it will be removed in SysON soon (see this ticket in Sirius Web)[https://github.com/eclipse-sirius/sirius-web/issues/3013], when Sirius Web will allow to configure which representations can be used or not in Sirius Web-based applications).
+- https://github.com/eclipse-syson/syson/issues/52[#52] [metamodel] SysON SysMLv2 metamodel module now depends on `org.eclipse.emf.ecore.xmi` and `java-uuid-generator`.
+- Switch to vite 4.5.2
+
+=== New features
+
+- https://github.com/eclipse-syson/syson/issues/48[#48] [general-view] Display help background message on empty general-view diagram.
+- https://github.com/eclipse-syson/syson/issues/52[#52] [syson] Add support for SysMLv2 standard libraries.
+Only some KerML libraries have been added:
+Base, BooleanFunctions, Clocks, CollectionFunctions, Collections, ComplexFunctions, ControlFunctions, DataFunctions, IntegerFunctions, KerML, Links, NaturalFunctions, NumericalFunctions, RationalFunctions, RealFunctions, ScalarFunctions, ScalarValues, SequenceFunctions, StringFunctions, TrigFunctions, VectorFunctions, VectorValues.
+Some of these libraries may have partial content.
+Other libraries and complete existing libraries will be added in future releases.
+- https://github.com/eclipse-syson/syson/issues/60[#60] [syson] Add support for automatic imports.
+
+== v2023.12.0
+
+=== Architectural decision records
+
+- [ADR-000] Adopt ADRs
+- [ADR-001] Support direct edit in diagrams
+
+=== New Features
+
+- This is the first release of SysON.
+It contains:
+** The ability to create and edit SysMLv2 models.
+** The ability to create and edit General View diagrams on Package elements. Only some elements can be created/edited in this diagram:
+*** Attribute Definition
+*** Attribute Usage
+*** Enumeration Definition
+*** Enumeration Usage
+*** Interface Definition
+*** Interface Usage
+*** Item Definition
+*** Item Usage
+*** Metadata Definition
+*** Package
+*** Part Definition
+*** Part Usage
+*** Port Definition
+*** Port Usage
+** The ability to create and edit Interconnection View diagrams on Part Usage elements.
+** An example of a SysMLv2 model named _Batmobile_, accessible from the homepage.
+** The ability to download and upload SysMLv2 projects.

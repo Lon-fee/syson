@@ -1,0 +1,442 @@
+= 2025.4.0
+
+== Key highlights
+
+- *Model conformance to {sysmlv2} Beta 2.4 version*: the metamodel has been modified to conform to {sysmlv2} and {kerml} 2024-12 specifications released on December 2024 (see https://www.omg.org/spec/SysML/ for more details).
+All existing models/projects in {product} will be automatically migrated to this new version.
+In any case, download all your existing models/projects before upgrading to 2025.4.0 (as always).
+
+- *Libraries publication/import*: the SysML contents of a project may now be published as a library.
+After publication, the library is listed in `<baseUrl>/libraries/`.
+Projects may now import published libraries.
+Projects may now update the version of a published library they depend on.
+More details at xref:user-manual:features/publication.adoc[Publication section] and xref:user-manual:features/library-import.adoc[Library import section] in this documentation for more details.
+
+== Breaking changes
+
+- A `SuccessionUsage` now computes its _source_ and _target_ from the properties _sourceFeature_ and _targetFeature_.
+It might causes some `SuccessionUsage` not to be displayed correctly in diagrams if they were starting or ending from an inherited standard library `ActionUsage` (such as `start` or `done)`.
+In such cases, delete the `SuccessionUsage` graphical node and recreate it graphically (for example by drag&drop or with _Add existing element_ tool).
+
+== Bug fixes
+
+- Fix an issue while computing the name of `VariantMembership`.
+This has an impact on name resolution against `Element` contained in `VariantMembership` during the textual import process (for example for `EnumerationUsage` literals in `EnumerationDefinition`).
+- Fix resolution of "unrestricted" names. For example, while importing the following model, the reference to _'p 2'::'A 1'_ is now properly resolved.
+
+```
+package p1 {
+    package 'p 2' {
+        action def 'A 1';
+    }
+    action 'a 2' : 'p 2'::'A 1';
+}
+```
+- Fix a problem encountered during the import of a {sysml} textual file in a specific model configuration. The model incorrectly resolved the target of a `Redefinition` when a name conflict was detected.
+- Fix an issue that prevented the export functionality to correctly produce qualified name for elements referenced in `FeatureReferenceExpression`.
+- In `Explorer View`, the fold/unfold arrow is now also available for non-sysml model elements.
+- Fix computation of `SuccessionAsUsage.getSourceFeature()` derived reference when using implicit source such as in the following example:
+
+```
+action def ActionDef1 {
+    action ax2;
+    action ax1;
+    then ax2;
+    then decide; // <- The source is ax1
+}
+```
+- Fix an issue on import that set the default `TransitionFeatureKind` value on accept and do `TransitionFeatureMembership`
+Importing an "accept" `TransitionFeatureMembership` now correctly sets its kind to `trigger`.
+Importing a "do" `TransitionFeatureMembership` now explicitly sets its kind to `effect`.
+- Fix an issue on import that set the default `RequirementConstraintKind` value on require and assume `RequirementConstraintMembership`
+Importing a "require" `RequirementConstraintMembership` now correctly sets its kind to `requirement`.
+Importing an "assume" `RequirementConstraintMembership` now explicitly sets its kind to `assumption`.
+- Fix import of `TextualRepresentation` to clean _language_ and _body_ properties.
+They no longer contain the extra characters:
+
+* _/*_
+* _*/_
+* _"_
+
+- Uniformize the import of `LiteralString`.
+The `value` field of imported `LiteralString` elements does not contain double quotes anymore.
+This behavior is aligned with how SysON handles quotes in `declaredName` fields.
+- Fix the textual export of `LiteralString` not wrapped in double quotes.
+The user had to explicitly add the double quotes around a `LiteralString` value to ensure the export was producing valid SysML.
+This is not the case anymore.
+
+- Fix the creation of `TransitionUsage` from an `ActionUsage` to the "Done" ActionUsage.
+- Fix the value of the `isLibraryElement` attribute for elements inside `LibraryPackage`.
+The attribute is now correctly `true` for elements contained in the ownership tree of a `LibraryPackage`.
+
+== New features
+
+- The {sysml} contents of a project may now be published as a library.
+The command palette now contains a dedicated command to do so.
+
+image::release-notes-publication-command.png[Publication command, width=65%,height=65%]
+
+Note that it's only available for projects with documents containing {sysml} elements as their root contents.
+The publication process only publishes the {sysml} contents.
+
+image::release-notes-publication-model.png[Publication command, width=30%,height=30%]
+
+Upon selecting this command, a dialog prompts for the library information.
+
+image::release-notes-publication-dialog.png[Publication command dialog, width=85%,height=85%]
+
+When the publication is successful, a success notification appears.
+Otherwise, an error notification appears, for example when trying to publish a library in a version that already exists.
+
+image::release-notes-publication-success.png[Publication success notification, width=85%,height=85%]
+
+After publication, the library is listed in `<baseUrl>/libraries/`.
+This page is also accessible from the 'help' menu in the top right corner of the application.
+
+image::release-notes-publication-libraries-menu.png[Libraries menu, width=85%,height=85%]
+
+This page lists all the libraries published in the application.
+
+image::release-notes-publication-libraries.png[Libraries, width=85%,height=85%]
+
+Opening a library displays it as a read-only project.
+
+image::release-notes-publication-library.png[Libraries, width=85%,height=85%]
+
+- Projects may now import published libraries.
+The command palette now contains a dedicated command to do so.
+
+image::release-notes-publication-import-command.png[Import published library command, width=65%,height=65%]
+
+This command is available for any project to import any library.
+
+Upon selecting this command, a dialog prompts for the libraries to import.
+
+image::release-notes-publication-import-dialog.png[Import published library command dialog, width=85%,height=85%]
+
+The import is done either by "reference" or by "copy".
+With the former, the contents of the library are accessed in read-only mode.
+With the latter, a copy of the contents of the library are copied into the project, and they may be used and edited as if they had been manually created into the project.
+
+image::release-notes-publication-import-choices.png[Import published library command dialog, width=85%,height=85%]
+
+Upon importing:
+
+- If one of the selected libraries is already imported (same namespace, name and version) then it will not be imported a second time.
+- Dependencies are re-loaded, which may trigger imported libraries to re-appear in the Explorer view if they had been manually removed.
+
+Upon a successful import, a notification appears in the bottom right corner.
+
+image::release-notes-publication-import-success.png[Import published library command success notification, width=30%,height=30%]
+
+The project contents are updated.
+
+image::release-notes-publication-import-result.png[Project contents after successfully importing a published library, width=50%,height=50%]
+
+If a document from an imported-by-reference library has a root element that is an instance of `LibraryPackage`, then that document is displayed under the 'User libraries' node in the 'Explorer' view.
+
+image::release-notes-publication-import-user-library.png[Imported published library under User libraries, width=50%,height=50%]
+
+- Projects may now update the version of a published library they depend on.
+
+In the Explorer view, the contextual menu on documents from imported-by-reference published libraries now contains an entry to update the version of the library dependency.
+
+image::release-notes-library-update-action.png[Contextual menu action 'Update library' for documents from imported-by-reference published libraries, width=30%,height=30%]
+
+Upon selecting this action, a dialog prompts for the new version of the library to use.
+
+image::release-notes-library-update-dialog.png[Dialog for the 'Update library' action, width=85%,height=85%]
+
+After the library update has been performed, if successful, a notification appears.
+
+image::release-notes-library-update-success.png[Dialog for the 'Update library' action, width=30%,height=30%]
+
+Updating a library means that the contents of the project are updated.
+Libraries may add, remove or edit their contents between versions.
+This means projects may become invalid because some of the library elements it was built upon no longer exist, or their identity has changed.
+
+
+== Improvements
+
+- Align metamodel to {sysmlv2} 2024-12 specification released on December 2024(see https://www.omg.org/spec/SysML/ for more details) and {kerml} 2024-12 specification released on December 2024(see https://www.omg.org/spec/KerML/ for more details).
+Download all your models/projects before upgrading to 2025.4.0.
+The new concepts are:
+* `CrossSubsetting` (inherits from `Subsetting`)
+* `IndexExpression` (inherits from `OperatorExpression`)
+The new operations are:
+* `Usage#referencedTargetFeature()`
+* `Type#supertypes(EBoolean)`
+* `Type#removedRedefinedFeatures(Membership)`
+* `Type#nonPrivateMemberships(Namespace, Type, EBoolean)`
+* `Type#inheritableMemberships(Namespace, Type, EBoolean)`
+* `Type#multiplicities()`
+* `Namespace#membershipsOfVisibility(VisibilityKind, Namespace)`
+* `Membership#allRedefinedFeatures()`
+* `Feature#allRedefinedFeatures()`
+* `Feature#asCartesianProduct()`
+* `Feature#isCartesianProduct()`
+* `Feature#isOwnedCrossFeature()`
+* `Feature#ownedCrossFeature()`
+The new references are:
+* `CrossSubsetting#crossedFeature`
+* `CrossSubsetting#crossingFeature`
+* `Feature#crossFeature`
+* `Feature#ownedCrossSubsetting`
+* `Annotation#ownedAnnotatingElement`
+* `AnnotatingElement#owningAnnotatingRelationship`
+* `FlowConnectionDefinition#flowConnectionEnd`
+The modifications are:
+* `Usage#nestedConnection` now subsets `Usage#nestedUsage` instead of `Usage#nestedPart`
+* `CaseDefinition#subjectParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `CaseDefinition#objectiveRequirement` now subsets `Definition#usage` instead of `Usage#ownedRequirement`
+* `CaseDefinition#actorParameter` now subsets `Definition#usage` instead of `Usage#ownedPart`
+* `CaseUsage#subjectParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `CaseUsage#objectiveRequirement` now subsets `Usage#usage` instead of `Usage#nestedRequirement`
+* `CaseUsage#actorParameter` now subsets `Usage#usage` instead of `Usage#nestedPart`
+* `RequirementDefinition#subjectParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementDefinition#stakeholderParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementDefinition#actorParameter` now subsets `Definition#usage` instead of `Definition#ownedUsage`
+* `RequirementUsage#subjectParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `RequirementUsage#stakeholderParameter` now subsets `Usage#usage` instead of `Usage#nestedUsage`
+* `RequirementUsage#actorParameter` now subsets `Usage#usage` instead of `Usage#nestedPart`
+* `Type#inheritedMemberships`
+** `excluded` parameter renamed to `excludedTypes`
+** new `excludedNamespaces : Namespace [0..\*]` parameter
+* `MultiplicityRange#bound` now subsets `Namespace#ownedMember` instead of redefining it
+* `InvocationExpression#operand` has been deleted
+* `FlowConnectionUsage` now inherits from `ConnectorAsUsage` instead of `ConnectionUsage`
+* `Definition#ownedConnection` now subsets `Definition#ownedUsage` instead of `Definition#ownedPart`
+* `Annotation#annotatingElement` is now derived
+* `AnnotatingElement#annotation` is now derived
+* `FlowConnectionDefinition` don't inherits from `ConnectionDefinition` anymore
+* `FlowConnectionUsage#flowConnectionDefinition` don't redefines `ConnectionUsage#connectionDefinition` anymore
+- All standard libraries have been updated to comply with the {sysmlv2} 2024-12 specification.
+- All validation rules have been updated to comply with the {sysmlv2} 2024-12 specification.
+- In `General View` and `State Transition View` diagrams, when `Packages` labels exceed the available space, an ellipsis is added to offer a visual sign that the
+name is truncated.
+
+image::release-notes-package-name-ellipsis-overflow.png[Package name overflow with ellipsis, width=85%,height=85%]
+
+- In diagrams, the direct edit tool on `Feature` elements now allows to use the ":=" and "default" symbols (see for more details in xref:user-manual:hands-on/how-tos/model-management.adoc#direct-edit[user documentation] ).
+- It's now possible to create a `General View` diagram under root namespace elements.
+
+image::release-notes-create-diagram-on-root-namespace-element.png[Create diagram on root namespace element, width=50%, height=50%]
+
+- In the _General View_ diagram, the subject creation tool displays available `Usages` in a tree instead of a list.
+
+image::release-notes-gv-subject-creation-selection-dialog-tree.png['subject creation tool selection dialog tree' compartment, width=50%, height=50%]
+
+- Improve handling of `SuccessionAsUsage` textual import with implicit _source_ property.
+For example importing the following {sysmlv2} content would now create a valid semantic model:
+
+```
+action def ActionDef1 {
+    action a2;
+    action a3;
+    first start;
+    then a2;
+    then a3;
+}
+```
+
+The textual export module has also be improved to produce the same file than the one imported.
+
+- The _General View_ diagram now supports `Satisfy Requirement Usage` objects.
+A new creation tool can be found in the `Requirements` section of the palette.
+`Satisfy Requirement Usage` objects may also be drag-and-dropped from the _Explorer_ onto the diagram background.
+
+image::release-notes-gv-satisfy-requirement-usage.png[Satisfy Requirement Usage node creation tool, width=50%, height=50%]
+
+- The `General View` diagram is now proposed first when creating a diagram.
+- It's now possible, in diagrams, to reduce the width of `Usages` (for example `Part`) and `Definition` (for example `Part Definition`) graphical nodes with a long name as their label can now be wrapped.
+- Improve textual import of `SuccessionAsUsage` which define a new target action directly after the 'then' keyword.
+For example importing the following {sysml} file would now create a valid semantic model:
+
+```
+action def ActionDef1 {
+    first start;
+    then action a1;
+    then action a2;
+}
+```
+- Improve textual export of `SuccessionAsUsage` by properly handle its _name_.
+For example exporting a model of an `ActionDefinition` containing two `ActionUsages` and a named `SuccessionAsUsage` would produce the following file:
+
+```
+action def ActionDef1 {
+    action a1;
+    action a2;
+    succession s1 first a1 then a2;
+}
+```
+- Improve `PortDefinition` textual import by creating the required `ConjugatedPort` during the import process.
+
+- Improve textual import of `TransitionUsage` by handling _implicit_ source property.
+In the following example, the source of outgoing `TransitionUsages` of the `DecisionNode` are now properly resolved.
+
+```
+action a0 {
+    private import ScalarValues::*;
+    action a1;
+    action a2;
+    action a3;
+    action a4;
+
+    attribute attr1 : Real;
+    first a0 then d1;
+    decide d1;
+        if x >= 2 then a1; // Source is d1
+        if x >= 1 and x < 2 then a3; // Source is d1
+        else a4; // Source is d1
+}
+```
+
+- Improve the textual import of `TransitionUsage` by handling guards.
+The import can now handle `OperatorExpression` such has:
+
+```
+action a0 {
+    attribute attr1 : Real;
+    succession S first start if x < 0.0 then done;
+}
+```
+- Implement `ConnectionDefinition` derived references and operations in {product} {sysmlv2} metamodel.
+- `TransitionUsages` can now be displayed and created in the _General View_ and _Action Flow_ diagrams.
+Be aware that the guard expressions are displayed in the label but *can't* be edited yet using the direct edit tool.
+
+- Update Batmobile project example by fixing some of the issues found in the model:
+
+* Improvements on `SuccessionAsUsage` and `TransitionUsage`
+* Improvements of _General View_ diagram to be able to represent the "Drive Batmobile" action definition.
+
+image::DriveBatmobileActionFlow.png[Drive Batmobile ActionDefinition representation, width=85%,height=85%]
+
+- Simplify handling of "start" and "done" `ActionUsages`.
+Those elements can now be displayed without the special `Membership` previously used to "import" them in the parent.
+- The tool "Add Existing Elements" is now directly available from the Action Flow compartment in the `General View Diagram`.
+- Add support for implicit redefinition of `Behavior` and `Step` parameters.
+Parameters of `Behavior` and `Step` now implicitly redefine the matching parameters of `Behavior` subclassifications and `Step` specializations.
+See {kerml} 7.4.7.2 and 7.4.7.3 for more information.
+These implicit redefinitions aren't visible in the diagrams nor the explorer (like all the other implicit specializations).
+The importer can now import {sysml} files that contain `FeatureChainingExpression` relying on these implicit redefinitions.
+- An edge is now displayed between `OccurrenceDefinition` its nested `OccurrenceUsages`.
+
+image::NestedOccurrenceUsageEdge.png[Nested Occurrence Usage Edge, width=40%,height=40%]
+
+- It's now possible, in diagrams, to reduce the width of `NamespaceImport` graphical nodes with a long name as their label can now be wrapped.
+
+image::namespace-import-wrapped-label.png[NamesapceImport wrapped label, width=40%,height=40%]
+
+- Improve the name used in exported files of objects referenced by an implicit `Specialization`.
+For example, the name used to reference the "start" `ActionUsage` in the following model has been improved:
+
+.Before
+```
+action def ActionDef1 {
+    action a2;
+    first Actions::Action::start then a2;
+}
+```
+
+.After
+```
+action def ActionDef1 {
+    action a2;
+    first start then a2;
+}
+```
+
+- Support the textual export of `TransitionUsage` owned by `ActionUsage` and `ActionDefinition` such as:
+
+```
+action def A1 {
+    private import ScalarValues::Integer;
+    attribute x : Integer;
+    action a1;
+    action a2;
+    first a1 if x == 1 then a2;
+    succession s1 first a1 if x > 1 & x < 2 then a2;
+    succession s2 first a1 if x > 2 & x < 3 then a2;
+}
+```
+
+- Implement textual export of `DecisionNode` such as:
+
+```
+action def A1 {
+    action a1;
+    action a2;
+    action a3;
+    attribute x : ScalarValues::Real;
+    decide decision1;
+    if x >= 2.1 then a1;
+    if x >= 1.1 and x < 2.1 then a2;
+    else a3;
+}
+```
+
+- In _General View_ diagram, `PortUsage` are now represented as border nodes on `PartUsage` nodes.
+
+image::gv-port-as-border-node.png[Port as border node, width=60%,height=60%]
+
+- Allow to properly import libraries as copies if they have been created from models imported from textual SysML
+Models imported from textual SysML that contain `LibraryPackage` were always read-only, even when published as libraries and imported by the user.
+This conflicted with the expected behavior of the _import by copy_ feature, which should allow the user to edit the content of the imported library.
+- Use a _textarea_ widget to be able to edit multiline string properties in the _Details_ view.
+This is visible on the "body" property on:
+
+* `Comment`
+* `Documentation`
+* `TextualRepresentation`
+
+- `TextualRepresentations` can now be displayed and edited in the _General View_ diagram.
+
+image::GV_TextualRepresentation.png[TextualRepresentation on General View Diagram, width=40%,height=40%]
+
+- The navigation bar menu icon has been updated (from a question mark to a "classic" menu icon).
+At the beginning of SysON, it had sense because the only menu entry (i.e. a link) available on this menu was the documentation.
+Now, it also includes a menu entry to the projects page and a menu entry to the libraries page.
+
+image::release-notes-navigation-bar-menu-icon.png[navigation bar menu icon, width=85%,height=85%]
+
+- Add new SysMLv2 Library template allowing to create a project composed with a simple model with only one element: a `LibraryPackage`.
+This template is visible on the home page (like SysMlv2 and Batmobile templates).
+
+- Implement textual export of `TextualRepresentation` such as:
+
+```
+ action def P1 {
+    language "naturalLanguage"
+        /* some comment
+        some other comment */
+    rep l2 language "naturalLanguage2"
+        /* some comment 3 */
+}
+```
+- In _General View_ diagram, `Comments` can now be created from a `Dependency` graphical edge or a `TransitionUsage` graphical edge, using the graphical edge contextual menu (a.k.a. the palette).
+
+image::release-notes-gv-comment-on-dependency.png[Comment on Dependency, width=85%,height=85%]
+
+- In _General View_ diagram, `PortUsage` now have edges tools to create three types of edges:
+
+* `BindingConnectorAsUsage`
+* `InterfaceUsage`
+* `FlowConnectionUsage`
+
+image::gv-port-edge-tools.png[Port edge tools, width=60%,height=60%]
+
+- In _General View_ diagram, `ConnectionDefinition` are now represented as nodes.
+
+image::connection-definition-nodes.png[Connection Definition nodes, width=60%,height=60%]
+
+== Dependency update
+
+- Switch to https://github.com/spring-projects/spring-boot/releases/tag/v3.4.4[Spring Boot 3.4.4].
+- Switch to https://github.com/eclipse-sirius/sirius-web[Sirius Web 2025.4.0]
+- Switch to Turbo 2.4.4
+- Switch to @xyflow 12.4.4
+- Switch to Sirius EMF-JSON 2.4.0
+
+== Technical details
+
+* For technical details on this {product} release, including breaking changes, see https://github.com/eclipse-syson/syson/blob/main/CHANGELOG.adoc[changelog].

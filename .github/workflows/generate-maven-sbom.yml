@@ -1,0 +1,95 @@
+name: Generate Maven SBOM
+
+on:
+  workflow_run:
+    workflows: [Continuous integration]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        default: "main"
+        required: true
+
+env:
+  JAVA_VERSION: "17"
+  JAVA_DISTRO: "temurin"
+  PRODUCT_PATH: "backend/application"
+  PLUGIN_VERSION: "2.7.8"
+  SBOM_TYPE: "makeAggregateBom"
+  WORKFLOW_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+  WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
+  WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+  GITHUB_REF: ${{ github.ref }}
+  INPUTS_VERSION: ${{ github.event.inputs.version }}
+  EVENT_NAME: ${{ github.event_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM for backend
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request' && (github.event.workflow_run.head_branch == 'main' || startsWith(github.event.workflow_run.head_branch, 'v')) }}
+    outputs:
+      project-version: ${{ steps.version.outputs.PROJECT_VERSION }}
+    steps:
+      - name: Display metadata of workflow that has been completed before this one
+        run: |
+          echo "Run from workflow_run branch ${WORKFLOW_HEAD_BRANCH}"
+          echo "Run from workflow_run event ${WORKFLOW_EVENT}"
+          echo "Run on github.ref ${GITHUB_REF}"
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          ref: ${{ env.INPUTS_VERSION }}
+          persist-credentials: false
+
+      - name: Setup Java SDK
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+
+      - name: Generate sbom
+        env:
+          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn org.cyclonedx:cyclonedx-maven-plugin:$PLUGIN_VERSION:$SBOM_TYPE -f "$PRODUCT_PATH/pom.xml" --settings settings.xml
+
+      - name: Extract product version
+        id: version
+        shell: bash
+        run: |
+          event="${EVENT_NAME}"
+          event_workflow_run_head_branch="${WORKFLOW_HEAD_BRANCH}"
+          ref="${GITHUB_REF}"
+          input="${INPUTS_VERSION}"
+
+          VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/target/bom.json)"
+
+          if [[ "$event" == "workflow_run" ]] && [[ "$ref" == refs/heads/* ]] && [[ ! "$event_workflow_run_head_branch" =~ ^v ]]; then
+            VERSION="${VERSION}@dev"
+          fi
+
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Product version: $VERSION"
+
+      - name: Upload sbom
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-sbom
+          path: ${{ env.PRODUCT_PATH }}/target/bom.json
+
+  store-sbom-data: # stores sbom and metadata in a predefined format for otterdog to pick up
+    needs: ["generate-sbom"]
+    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@main
+    with:
+      projectName: "backend"
+      projectVersion: ${{ needs.generate-sbom.outputs.project-version }}
+      bomArtifact: "backend-sbom"
+      bomFilename: "bom.json"
+      parentProject: "75152c84-655b-4618-b23c-e5d3c3b562ae"

@@ -1,0 +1,41 @@
+= 2026.1.0 (work in progress)
+
+== Key highlights
+
+== Breaking changes
+
+== New features
+
+== Bug fixes
+
+- Fix an issue that displayed imported libraries at the root of the project if they contained `LibraryPackage` elements and non-`Namespace` elements.
+These models are now correctly displayed under the _User libraries_ directory.
+
+== Improvements
+
+- The textual export now properly exports `SatisfyRequirementUsage` such as in the following model:
++
+```
+package Requirements {
+    requirement <Req1> {
+        doc /* Some doc */
+    }
+    requirement def REQ2;
+}
+part Context1 {
+    part 'System 1';
+}
+package ReqSatisfactions {
+    private import Requirements::*;
+    assert satisfy Req1 by Context1.'System 1';
+    assert satisfy requirement Req2 : REQ2 by Context1.'System 1';
+}
+```
+
+- In diagrams, a new compartment named _parts_ can be enabled on a `PartUsages` to show nested `PartUsages` as a list:
+
+image::gv-parts-compartment.png[Parts compartment, width=50%]
+
+== Technical details
+
+* For technical details on this {product} release (including breaking changes), please refer to https://github.com/eclipse-syson/syson/blob/main/CHANGELOG.adoc[changelog].
