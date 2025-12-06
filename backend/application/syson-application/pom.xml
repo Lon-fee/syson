@@ -139,11 +139,6 @@
 			<artifactId>syson-sysml-validation</artifactId>
 			<version>2025.12.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.syson</groupId>
-			<artifactId>syson-ai-services</artifactId>
-			<version>2025.12.0</version>
-		</dependency>
 
 		<!-- Test Dependencies -->
 		<dependency>
